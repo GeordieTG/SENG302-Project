@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}">
+    <script th:src="@{/JavaScript/UserProfile.js}"></script>
+    <title>User Profile</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+</head>
+<body class="bg-body-secondary" style="background-repeat: no-repeat;">
+<header th:replace="~{fragments/header.html :: header}"></header>
+<div class="container">
+    <div class="row justify-content-center my-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#nav-profile">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#nav-details">Details</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="nav-profile">
+                            <div class="text-center">
+                                <h3 class="card-title">[[${firstName}]]'s profile</h3>
+                            </div>
+                            <div class="d-flex justify-content-center my-3">
+                                <img alt="image not found"
+                                     class="img-fluid rounded-circle profile-picture"
+                                     style="width: 200px; height: 200px"
+                                     th:src="@{${profilePicture}}">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="favouriteSport">Favourite Sport(s):</label>
+                                <input class="form-control" disabled id="favouriteSport"
+                                       placeholder="None" th:name="favouriteSport"
+                                       th:value="${favouriteSport}" type="text">
+                            </div>
+                            <button class="btn btn-primary" onclick="history.back()" type="submit">
+                                Go back
+                            </button>
+                        </div>
+                        <div class="tab-pane fade" id="nav-details">
+                            <div class="text-center">
+                                <h3 class="card-title">[[${firstName}]]'s Details</h3>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="firstName">First Name:</label>
+                                <input autofocus class="form-control" data-cy="firstName"
+                                       disabled id="firstName"
+                                       placeholder="First Name" th:name="firstName"
+                                       th:value="${firstName}"
+                                       type="text">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="lastName">Last Name:</label>
+                                <input class="form-control" data-cy="lastName" disabled
+                                       id="lastName" placeholder="Last Name"
+                                       th:name="lastName" th:value="${lastName}" type="text">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="DOB">Date of Birth:</label>
+                                <input class="form-control" data-cy="DOB" disabled
+                                       id="DOB" placeholder="DD/MM/YYYY" th:name="DOB"
+                                       th:value="*{DOB}" type="text">
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="email">Email:</label>
+                                <input class="form-control" data-cy="email" disabled
+                                       id="email" placeholder="Email" th:name="email"
+                                       th:value="${email}" type="email">
+                            </div>
+                            <button class="btn btn-primary" onclick="history.back()" type="submit">
+                                Go back
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

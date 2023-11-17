@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>ConQuest - Register</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <script th:src="@{/JavaScript/main.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/form.css}">
+    <link rel="stylesheet" th:href="@{/css/required.css}">
+    <script th:src="@{/JavaScript/locationAPI.js}"></script>
+</head>
+<body class="bg-body-secondary" onload="getUrl(); passwordStrengthIndicator() ">
+
+<header th:replace="fragments/welcomeHeader.html :: header"></header>
+
+<div class="d-flex align-items-center" style="height:80%">
+
+    <div class="container" onLoad={passwordStrengthIndicator} style="width:50%">
+        <div class="card">
+            <div class="card-body px-4 py-4">
+
+                <form enctype="multipart/form-data" method="post" th:action="@{/registration}"
+                      th:object="${userRegistration}">
+                    <input hidden id="url" th:name="url" type="text">
+                    <h4>Register</h4>
+
+                    <div id="page-1">
+                        <p style="color:grey" }>Create an account - let's start with the basics</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="required" for="firstName"> First Name: </label>
+                                <input autofocus class="form-control" data-cy="firstName"
+                                       id="firstName"
+                                       oninput="checkFirstName()" placeholder="John"
+                                       th:field="*{firstName}" th:name="firstName" type="text">
+                                <div ; id="firstNameError" style="color:red"
+                                     th:if="true == ${invalidFirstName}">Please enter a valid first
+                                    name
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="required" for="lastName"> Last Name: </label>
+                                <input autofocus class="form-control" data-cy="lastName"
+                                       id="lastName"
+                                       oninput="checkLastName()" placeholder="Doe"
+                                       th:field="*{lastName}"
+                                       th:name="lastName" type="text">
+                                <div ; id="lastNameError" style="color:red"
+                                     th:if="true == ${invalidLastName}">Please enter a valid last
+                                    name
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="required" for="email"> Email: </label>
+                                <input autofocus class="form-control" data-cy="email"
+                                       id="email"
+                                       oninput="checkEmail()" placeholder="example@email.com"
+                                       th:field="*{email}" th:name="email"
+                                       type="text">
+                                <div id="emailError" style="color:red"
+                                     th:if="true == ${invalidEmail}">[[${emailErrorMessage}]]
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="required" for="DOB"> Date of Birth: </label>
+                                <input autofocus class="form-control" data-cy="DOB"
+                                       id="DOB"
+                                       oninput="checkAge()" placeholder="DD/MM/YYYY"
+                                       th:field="*{dateOfBirth}"
+                                       th:name="DOB" type="date">
+                                <div id="dobError" style="color:red" th:if="true == ${invalidDOB}">
+                                    [[${errorDOBMessage}]]
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="required" for="password">Password:</label>
+                                <input autofocus class="form-control" data-cy="password"
+                                       id="password"
+                                       oninput="passwordStrengthIndicator()"
+                                       placeholder="Password"
+                                       th:field="*{password}" type="password">
+                                <div th:insert="~{fragments/passwordStrengthIndicator.html :: passwordStrengthIndicator}"></div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="required" for="confirmPassword"> Confirm
+                                    Password: </label>
+                                <input autofocus class="form-control" data-cy="confirmPassword"
+                                       id="confirmPassword"
+                                       placeholder="Confirm Password" th:field="*{confirmPassword}"
+                                       th:name="confirmPassword" type="password">
+
+                                <div id="matchPasswordsError" style="color:red"
+                                     th:if="true == ${matchPasswords}">[[${matchPasswordsMessage}]]
+                                </div>
+                            </div>
+
+                            <div class="d-inline-flex">
+                                <span>Show passwords?</span>
+                                <input class="mx-2" onclick="passwordVis()" type="checkbox">
+                            </div>
+                            <div class="d-flex justify-content-around">
+                                <a class="btn btn-secondary" href="demo" style="width:45%"
+                                   type="button">Cancel</a>
+                                <button class="btn btn-primary" onclick="nextPage()"
+                                        style="width:45%"
+                                        type="button">Next
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="page-2" style="display:none">
+                        <p style="color:grey" }>Almost there - just a few more things</p>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="address1">Address:</label>
+                                <input autocomplete="false" class="form-control" data-cy="address1"
+                                       id="address1"
+                                       list="address_list" oninput="onInput()"
+                                       onkeyup="timerStartOnKeyUpForAddress()"
+                                       placeholder="Street address"
+                                       th:field="*{address1}" th:name="address1"
+                                       type="text"/>
+                                <datalist id="address_list"></datalist>
+                                <input autofocus class="form-control mt-2" data-cy="address2"
+                                       id="address2"
+                                       placeholder="Street address continued" th:field="*{address2}"
+                                       th:name="address2" type="text">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="suburb">Suburb:</label>
+                                <input class="form-control" data-cy="suburb" id="suburb"
+                                       placeholder="Suburb"
+                                       th:field="*{suburb}" th:name="suburb"
+                                       type="text"/>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="required" for="city">City:</label>
+                                <input autofocus class="form-control"
+                                       data-cy="city" id="city"
+                                       list="city_list" onkeyup="timerStartOnKeyUpForCity()"
+                                       placeholder="City" th:field="*{city}"
+                                       th:name="city" type="text">
+                                <datalist id="city_list"></datalist>
+                                <div class="errorText"
+                                     style="color: red"
+                                     th:if="${validCity == false}"
+                                     th:text="'Please enter a valid city that contains only letters'"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="postcode">Postcode:</label>
+                                <input class="form-control" data-cy="postcode" id="postcode"
+                                       placeholder="Postcode"
+                                       th:field="*{postcode}" th:name="postcode"
+                                       type="text">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="required" for="country">Country:</label>
+                                <input class="form-control" data-cy="country"
+                                       id="country" list="country_list"
+                                       onkeyup="timeStartOnKeyUpForCountry()"
+                                       placeholder="Country"
+                                       th:field="*{country}" th:name="country"
+                                       type="text">
+                                <datalist id="country_list"></datalist>
+                                <div class="errorText"
+                                     style="color: red"
+                                     th:if="${validCountry == false}"
+                                     th:text="'Please enter a valid country that contains only letters'"></div>
+                            </div>
+                            <div class="d-flex justify-content-around">
+                                <button class="btn btn-secondary mt-4" onclick="previousPage()"
+                                        style="width:45%" type="button">
+                                    Previous
+                                </button>
+                                <button class="btn btn-primary mt-4" style="width:45%"
+                                        type="submit">Submit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

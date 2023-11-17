@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="icon" type="image/x-icon" href="/images/error-image.ico">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/error.css}">
+    <title>Errors</title>
+
+</head>
+<body class="bg-body-secondary">
+<header th:replace="fragments/welcomeHeader.html :: header"></header>
+<h1 class="text-body" th:text="${status == 404} ? 'This page doesn\'t exist please head back to home.' : 'Whoops! We got an error please head back to home.'"></h1>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3 text-center">
+            <img th:src="@{images/error-image.jpg}" alt="Error Image" class="img-fluid mb-4" style="aspect-ratio: 4/3">
+            <h1 class="display-4 text-danger">Oops! Page Not Found</h1>
+            <p class="lead text-body">The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+            <p class="lead text-body">Please go back to the <a href="profilePage">homepage</a>.</p>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>

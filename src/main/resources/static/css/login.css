@@ -1,0 +1,92 @@
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+h1 {
+    text-align: center;
+    font-size: 24px;
+}
+
+button[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+
+}
+
+button[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.response {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+p {
+    text-align: center;
+}
+
+hr {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #ccc;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.response button {
+    background-color: white;
+    padding: 10px 20px;
+    border: 2px solid black;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 20%;
+    margin: 0 10px;
+}
+
+.responseBTN:hover, .homeBTN:hover {
+    color: white;
+    background-color: black;
+}
+
+a {
+    display: inline-block;
+    margin-right: 10px;
+    color: #007bff;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.profilePicture {
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-position: center center;
+    object-fit: cover;
+}

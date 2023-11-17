@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>All Teams</title>    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/required.css}">
+    <link rel="stylesheet" th:href="@{/css/teamSearch.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <script>
+        function toolTip() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        }
+    </script>
+    <script th:src="@{/JavaScript/allTeams.js}"></script>
+    <style>
+        .custom-circle {
+            height: 1rem;
+            width: 1rem;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body onload="toolTip(), setCheckboxes()"
+      class="bg-body-secondary">
+
+<header th:replace="~{fragments/header.html :: header}"></header>
+<div>
+    <div>
+        <div class="container card px-3 py-3 mt-3">
+            <form id="filterForm" method="post" th:action="@{/viewTeams}">
+
+                <div class="form-inline d-flex">
+                    <input autofocus class="form-control" data-cy="searchQuery"
+                           id="searchQuery"
+                           oninput="setCustomValidity('')"
+                           oninvalid="this.setCustomValidity('Please Enter at least 3 characters to search.')"
+                           pattern="(.){3,}$"
+                           placeholder="Search Teams..." required
+                           th:name="searchQuery"
+                           th:value="*{searchQuery}"
+                           type="text">
+                    <button class="btn btn-primary" id="submit-search-btn" type="submit">Search
+                    </button>
+                </div>
+
+
+                <input data-cy="hiddenFilterQuerySport" id="hiddenFilterQuerySport"
+                       style="display:none;"
+                       th:name="hiddenFilterQuerySport"
+                       th:value="${searchQuerySport}" type="text"/>
+                <input data-cy="hiddenFilterQueryCity" id="hiddenFilterQueryCity"
+                       style="display:none;"
+                       th:name="hiddenFilterQueryCity"
+                       th:value="${searchQueryCity}" type="text"/>
+                <input data-cy="showAllTeams" id="showAllTeams" style="display:none;"
+                       th:name="showAllTeams"
+                       th:value="${showAllTeams}" type="text"/>
+
+
+                <div class="form-inline d-flex mt-3 justify-content-between">
+
+                    <div class="d-flex">
+                        <a class="btn btn-danger" id="reset-filter-btn"
+                           th:href="@{'/viewTeams?showAllTeams=' + ${showAllTeams}}">
+                            <svg class="bi bi-trash3" fill="currentColor" height="16"
+                                 viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                            </svg>
+                            Reset
+                        </a>
+
+                        <div class="mx-1">
+                            <button aria-expanded="false" class="btn btn-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown" id="sport-filter-dropdown-btn"
+                                    type="button">Sport
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li class="text-center" th:if="${sports.size}==0">No Filters</li>
+                                <li th:each="sport, iStat : ${sports}">
+                                    <div class="form-check mx-3 py-1">
+                                        <input onchange="changeFilterSport(this); applyFilter()"
+                                               th:class="'form-check-input' + ' sport-index-'+${iStat.index}"
+                                               th:id="${sport}" th:value="${sport}"
+                                               type="checkbox"/>
+                                        <label class="form-check-label" th:for="${sport}"
+                                               th:text="${sport}"></label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+
+
+                        <div>
+                            <button aria-expanded="false" class="btn btn-primary dropdown-toggle"
+                                    data-bs-toggle="dropdown" type="button">City
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li class="text-center" th:if="${cities.size}==0">No Filters</li>
+                                <li th:each="city : ${cities}">
+                                    <div class="form-check mx-3 py-1">
+                                        <input class="form-check-input"
+                                               onchange="changeFilterCity(this); applyFilter()"
+                                               th:id="${city}" th:value="${city}"
+                                               type="checkbox"/>
+                                        <label class="form-check-label" th:for="${city}"
+                                               th:text="${city}"></label>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="mx-4" th:if="${showAllTeams}==0">
+                            <a class="btn btn-outline-dark" data-bs-target="#joinModal"
+                               data-bs-toggle="modal" id="joinTeamBtn">Join Team</a>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center" data-bs-html="true"
+                         data-bs-placement="right"
+                         data-bs-toggle="tooltip"
+                         title="<div class='d-flex justify-content-between align-items-center gap-1'>Club<img src='images/green-circle.png' class='custom-circle'></div><div class='d-flex justify-content-between align-items-center gap-1'>Team<img src='images/blue-circle.png' class='custom-circle'></div>">
+                        <svg class="bi bi-question-circle" fill="currentColor" height="32"
+                             viewBox="0 0 16 16" width="32" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                        </svg>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+        <div class="text-center mt-5" th:if="${totalItems} == 0">No Results</div>
+        <div class="container mt-4">
+            <div class="row row-cols-1 row-cols-md-5 g-3">
+                <div class="team" th:each="team, iStat : ${teams}" th:id="'index-'+${team.id}">
+                    <div class="col h-100">
+                        <div class="card mb-3 h-100">
+                            <div class="row g-0">
+                                <div class="card-body text-center"
+                                     th:style="${team.getClass().toString().contains('Club')} ? 'background: linear-gradient(#7bc985 30px, transparent 30px)' : 'background: linear-gradient(#72a3db 30px, transparent 30px)'">
+
+                                    <div class="stretched-link"
+                                         th:if="${!team.getClass().toString().contains('Club')}"
+                                         th:onclick="'window.location.href = \'' + @{/viewTeam(id=${team.id},page=${page},showAllTeams=${showAllTeams})} + '\''">
+                                        <img alt="image not found" class="profilePicture"
+                                             th:src="@{${team.image}}">
+                                    </div>
+
+                                    <div class="stretched-link"
+                                         th:if="${team.getClass().toString().contains('Club')}"
+                                         th:onclick="'window.location.href = \'' + @{/viewClub(id=${team.id})} + '\''">
+                                        <img alt="image not found" class="profilePicture"
+                                             th:src="@{${team.image}}">
+                                    </div>
+
+                                    <div class="mt-3 fw-bold"
+                                         th:id="'team-name-index-'+${iStat.index}"
+                                         th:text="${team.name}"></div>
+                                    <div th:text="${team.location}"></div>
+                                    <div th:id="'team-sport-index-'+${iStat.index}"
+                                         th:text="${team.sport}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="d-flex justify-content-center align-items-center mt-3 gap-2" style="font-size: large">
+        Total Items [[${totalItems}]]&nbsp; -
+        <span th:each="i: ${#numbers.sequence(1, totalPages)}" th:if="${totalPages} != 0">
+            <a class="btn btn-primary"
+               th:href="@{'/viewTeams?currentPage=' + ${i} + '&searchQuery=' + ${searchQuery} + '&sportQuery=' + ${searchQuerySport} + '&cityQuery=' + ${searchQueryCity} + '&showAllTeams=' + ${showAllTeams}}"
+               th:id="'page-' + ${i}"
+               th:if="${i}!=0 and ${filter} and ${showAllTeams}!=0 and ${currentPage}==${i}">[[${i}]] </a>
+            <a th:href="@{'/viewTeams?currentPage=' + ${i} + '&searchQuery=' + ${searchQuery} + '&sportQuery=' + ${searchQuerySport} + '&cityQuery=' + ${searchQueryCity} + '&showAllTeams=' + ${showAllTeams}}"
+               th:id="'page-' + ${i}"
+               th:if="${i}!=0 and ${filter} and ${showAllTeams}!=0 and ${currentPage}!=${i}">[[${i}]] </a>
+            <a class="btn btn-secondary"
+               th:href="@{'/viewTeams?currentPage=' + ${i} + '&searchQuery=' + ${searchQuery} + '&sportQuery=' + ${searchQuerySport} + '&cityQuery=' + ${searchQueryCity} + '&showAllTeams=' + ${showAllTeams}}"
+               th:id="'page-' + ${i}"
+               th:if="${showAllTeams}==0 and ${currentPage}==${i}">[[${i}]]</a>
+            <a th:href="@{'/viewTeams?currentPage=' + ${i} + '&searchQuery=' + ${searchQuery} + '&sportQuery=' + ${searchQuerySport} + '&cityQuery=' + ${searchQueryCity} + '&showAllTeams=' + ${showAllTeams}}"
+               th:id="'page-' + ${i}"
+               class="btn btn-outline-secondary"
+               th:if="${showAllTeams}==0 and ${currentPage}!=${i}">[[${i}]]</a>
+        </span>
+    </footer>
+
+
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

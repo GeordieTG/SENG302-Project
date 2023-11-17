@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/loader.css}">
+    <link rel="stylesheet" th:href="@{/css/meal.css}">
+    <script th:src="@{/JavaScript/recordMeal.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <title>Nutrition</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <script th:inline="javascript">
+
+        /*<![CDATA[*/
+
+        let userId = /*[[${userId}]]*/ '';
+        let csrfToken = /*[[${_csrf.token}]]*/ '';
+        createGlobal(csrfToken)
+
+        /*]]>*/
+    </script>
+</head>
+
+
+<body th:onload="handle7DaysObject(userId);loadRecent([[${recentFoods}]]);createFoodNutritionChart();" class="bg-body-secondary">
+    <header th:replace="~{fragments/header.html :: header}"></header>
+    <section class="container-md">
+        <div class="m-3" id="column-1">
+            <div class="row gap-3 gap-xl-0">
+
+                <div class="col-12 col-xl-7">
+                    <div class="card p-4"
+                         style="height: 350px; display: flex; flex-direction: column;">
+
+                        <h4 class="fw-bold">Weekly Nutritional Overview</h4>
+                        <div class="card w-100" style="height: 200px" >
+                            <canvas id="weeklyNutrition"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-5">
+
+                    <div class="card p-4"
+                         style="height: 350px; display: flex; flex-direction: column;">
+
+                        <h4 class="fw-bold">Weekly Energy Intake Overview</h4>
+                        <div class="card w-100" style="height: 200px" >
+                            <canvas id="energy"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <!-- Recent meals -->
+                <div class="col-12 mt-0 mt-xl-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="m-0">Recent Meals</h4>
+                            <!-- Button trigger modal -->
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" id="showAddFoodModalBtn" data-bs-target="#addFoodModal">
+                                Record Food
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="recentFoodsDiv">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Modal -->
+        <div class="modal fade text-body" id="addFoodModal" data-bs-backdrop="static"
+             data-bs-keyboard="false" tabindex="-1"
+             aria-labelledby="recordFoodModalLabel" aria-hidden="true" style="color: #000">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Add food</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="mealForm" method="post" th:action="@{addFood}"
+                              onsubmit="submitFood(event)"
+                              th:id="mealForm" th:name="mealForm">
+
+                            <div class = "row">
+                                <div class="col-sm w-100 container position-relative">
+                                    <input type="text" id="foodSearch"
+                                           class="form-control w-100"
+                                           list="food_list"
+                                           autocomplete="off"
+                                           onclick=clearFoodSearch()
+                                           placeholder="Search Food">
+                                </div>
+                            </div>
+
+                            <div class = "row">
+                                <div class="col-sm">
+                                    <datalist id="food_list" ></datalist>
+                                </div>
+                            </div>
+
+                            <div id="foodNutritionOverview"
+                                 class="d-flex flex-column">
+
+                                <h5 id="foodName" class="pt-2"></h5>
+
+                                <div id="nutritionInfo" class="container">
+                                    <div id="loading" class="position-absolute three-body" style="right:47.5%; top: 50%; visibility: hidden">
+                                        <div class="three-body__dot"></div>
+                                        <div class="three-body__dot"></div>
+                                        <div class="three-body__dot"></div>
+                                    </div>
+
+                                    <div id="noFoodResultLabel" class="position-absolute" style="display: none; right:45%; top: 50%;">
+                                        <p>No Results</p>
+                                    </div>
+
+                                    <div id="graphContainer" style="flex: 1; visibility: hidden" >
+                                        <canvas id="nutritionDoughnutChart"></canvas>
+                                    </div>
+
+                                    <div id="nutritionLabels" class="row"
+                                         style="visibility: hidden">
+                                        <div class="col-3">
+                                            <div class="d-flex flex-column">
+                                                <p style="color: #FFCE56" class="mb-0">Protein</p>
+                                                <p id="protein"></p>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="d-flex flex-column">
+                                                <p style="color: #451ebb" class="mb-0">Sugar</p>
+                                                <p id="sugar"></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="d-flex flex-column" >
+                                                <p style="color: #3fb4a4" class="mb-0">Fat</p>
+                                                <p id="fat" ></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="d-flex flex-column">
+                                                <p style="color: #FF0000" class="mb-0">Carbs</p>
+                                                <p id="carbohydrates" ></p>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <label id="servingSizeLabel" style="display:none;" for="servingSize">
+                                    Portion</label>
+                                <select class="form-select" aria-label="servingSize" id="servingSize" style="display:none;" onchange=setCurrentPortionGramWeight(this)>
+                                    <option selected>Grams</option>
+                                </select>
+                                <label id = "mealQuantityLabel" style="display:none;" for="mealQuantity">Quantity</label>
+                                <input type="text"
+                                       class="w-25"
+                                       id="mealQuantity"
+                                       style="display:none;"
+                                       placeholder="grams"
+                                       value="100"
+                                       name="quantity"
+                                       min="1"
+                                       oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                                       onkeyup="displayNutrition(document.getElementById('fdcIdInput').value)">
+                                <input name="fdcId"
+                                       id="fdcIdInput"
+                                       value=""
+                                       type="number"
+                                       style="display: none">
+                                <input name="portionSizeNumber" id="portionSizeNumber" value="0" type="number" style="display: none">
+
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-primary" id="addMealBtn" form="mealForm" style="display: none">
+                            Add Meal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+    <div aria-atomic="true" aria-live="assertive" class="position-fixed end-0 m-2 bottom-0 toast align-items-center text-dark bg-success bg-opacity-25 border-start border-success border-5 border-0" id="foodAdded" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"></path>
+                </svg>
+                <p class="m-0 h5 toast-success">Food Added Successfully</p>
+            </div>
+        </div>
+    </div>
+    <div aria-atomic="true" aria-live="assertive" class="position-fixed end-0 m-2 bottom-0 toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0" id="foodAddedFailure" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg class="bi bi-exclamation-diamond-fill" fill="#D9534F" height="2rem" viewBox="0 0 16 16" width="2rem" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"></path>
+                </svg>
+                <p class="m-0 h5 toast-danger">Food not added!</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    let inputTimeout;
+
+    document.getElementById("foodSearch").addEventListener("input", function() {
+        if (document.getElementById("food_list").children.length < 1) {
+            hideAll();
+        }
+
+        clearTimeout(inputTimeout); // Clear the previous timeout
+        inputTimeout = setTimeout(function() {
+            // Perform the desired action here
+            handleFoodSearchChange(document.getElementById("foodSearch"));
+        }, 500); // Set the timeout to 0.5 seconds (500 milliseconds)
+    });
+</script>

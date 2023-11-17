@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>Create Formation</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <script th:src="@{/JavaScript/main.js}"></script>
+    <script th:src="@{/JavaScript/locationAPI.js}"></script>
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/field.css}">
+    <link rel="stylesheet" th:href="@{/css/required.css}">
+</head>
+<body class="bg-body-secondary">
+
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<div class="d-flex align-items-center mt-3">
+
+    <div class="container w-50">
+        <div class="card">
+            <div class="card-body px-4 py-4">
+
+                <form enctype="multipart/form-data" method="post" th:action="@{/processForm}"
+                      th:id="formationForm" th:name="formationForm" th:object="${formationForm}">
+                    <input hidden id="url" th:name="url" type="text">
+                    <input id="id" th:name="id" th:value="${id}" type="hidden">
+                    <input name="action" type="hidden" value="create"/>
+
+                    <h4>Create Formation</h4>
+
+                    <p style="color:grey">There is no 'I' in team</p>
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="required" for="formation"> Formation: </label>
+                            <input class="form-control" id="formation" placeholder="4-2-3-1"
+                                   th:field="*{formation}"/>
+                            <div id="formationError" style="color: red"
+                                 th:if="${formationError}"
+                                 th:text="'Please follow the pattern e.g 4-3-3. The maximum formation is 8 people in 6 rows eg. 8-8-8-8-8-8'"></div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="required" for="sport"> Field: </label>
+                            <select class="form-select" id="sport" th:name="sport">
+                                <option selected th:value="none">Select Type</option>
+                                <option th:selected="${formationForm.sport == 'Rugby'}"
+                                        th:value="Rugby">Rugby
+                                </option>
+                                <option th:selected="${formationForm.sport == 'Futsal'}"
+                                        th:value="Futsal">Futsal
+                                </option>
+                                <option th:selected="${formationForm.sport == 'Hockey'}"
+                                        th:value="Hockey">Hockey
+                                </option>
+                                <option th:selected="${formationForm.sport == 'Cricket'}"
+                                        th:value="Cricket">Cricket
+                                </option>
+                                <option th:selected="${formationForm.sport == 'Netball'}"
+                                        th:value="Netball">Netball
+                                </option>
+                                <option th:selected="${formationForm.sport == 'Baseball'}"
+                                        th:value="Baseball">Baseball
+                                </option>
+                                <option th:selected="${formationForm.sport == 'Football'}"
+                                        th:value="Football">Football
+                                </option>
+                                <option th:selected="${formationForm.sport == 'Basketball'}"
+                                        th:value="Basketball">
+                                    Basketball
+                                </option>
+                                <option th:selected="${formationForm.sport == 'Volleyball'}"
+                                        th:value="Volleyball">
+                                    Volleyball
+                                </option>
+                                <option th:selected="${formationForm.sport == 'RugbyLeague'}"
+                                        th:value="RugbyLeague">Rugby
+                                    league
+                                </option>
+                            </select>
+                            <div id="fieldError" style="color: red"
+                                 th:if="${fieldError}" th:text="'Please select a field'"></div>
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <button class="btn btn-secondary mt-4" id="preview" style="width:45%"
+                                    th:formaction="@{/previewFormation}" type="submit">Set up
+                            </button>
+                        </div>
+
+                        <div
+                                th:replace="${formationForm.formation} and not ${formationError} and not ${fieldError} ? ~{fragments/formation.html :: formationDisplay(${formationForm.formationDisplay}, ${bgImage}, 'images/default.jpg')} : ~{}"></div>
+
+                        <div class="d-flex justify-content-around">
+                            <a class="btn btn-secondary mt-4" id="back" onclick="history.back()"
+                               style="width:45%">Back</a>
+                            <button class="btn btn-primary mt-4" id="createFormationButton"
+                                    style="width:45%" th:formaction="@{/createFormation}"
+                                    type="submit">
+                                Create Formation
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>Add Activity Facts</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <script th:src="@{/JavaScript/addActivityFacts.js}"></script>
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function handleErrorMessages() {
+            let errors = /*[[${errors}]]*/ '';
+            let factForm = /*[[${wrapper.factForms}]]*/ '';
+            rowCounter = factForm.length
+            displayErrorMessages(errors)
+        }
+
+        /*]]>*/
+    </script>
+</head>
+<body class="bg-body-secondary" onload="handleErrorMessages()">
+
+<header th:replace="~{fragments/header.html :: header}"></header>
+<form enctype="multipart/form-data" method="post" th:action="@{/addActivityFacts}"
+      th:id="statisticsForm" th:name="statisticsForm" th:object="${wrapper}">
+    <input id="activity-id" th:field="*{activityId}" type="hidden"/>
+    <div class="d-flex align-items-center" style="height:80%">
+
+        <div class="container" style="width:50%">
+
+
+            <div class="card mt-4">
+                <div class="card-body px-4 py-4">
+                    <h4>Add Facts</h4>
+                    <p style="color:grey">Will be displayed as: (Fact Description) at (Minute
+                        Occurred)'</p>
+
+                    <div id="tableContainer" style="max-height: 400px; overflow-y:auto">
+                        <table aria-describedby="Facts table containing a field for
+                               fact description and the time a fact occurred"
+                               class="table">
+                            <thead style="position: sticky; top:0; z-index: 1; background-color: white;">
+                            <tr>
+                                <th scope="col">Fact Description</th>
+                                <th scope="col">Minute Occurred</th>
+                                <th scope="col"></th>
+                            </tr>
+                            </thead>
+                            <tbody id="tableBody">
+
+                            <tr th:each="currentForm, stat : *{factForms}">
+                                <td>
+                                    <textarea class="form-control" maxlength="150" placeholder="Description"
+                                              th:field="*{factForms[__${stat.index}__].description}"
+                                              th:id="'fact-description-'+${stat.index}"
+                                              type="text"></textarea>
+                                </td>
+                                <td>
+                                    <input class="form-control" placeholder="Time"
+                                           th:field="*{factForms[__${stat.index}__].timeOccurred}"
+                                           th:id="'fact-time-'+${stat.index}"
+                                           th:name="'factForms['+${stat.index}+'].timeOccured'"
+                                           type="number">
+                                </td>
+                                <input th:field="*{factForms[__${stat.index}__].activityId}"
+                                       th:value="*{activityId}" type="hidden">
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <textarea class="form-control"
+                                              maxlength="150"
+                                              placeholder="Description"
+                                              th:id="'fact-description-'+*{factForms.size()}" th:name="'factForms['+*{factForms.size()}+'].description'"
+                                              type="text"></textarea>
+                                </td>
+                                <td>
+                                    <input class="form-control" id="fact-time-0"
+                                           placeholder="Time"
+                                           th:id="'fact-time-'+*{factForms.size()}"
+                                           th:name="'factForms['+*{factForms.size()}+'].timeOccurred'"
+                                           type="number">
+                                </td>
+                                <input th:name="'factForms['+ *{factForms.size()}+'].activityId'"
+                                       th:value="*{activityId}" type="hidden">
+                                <td>
+                                    <button class="btn btn-secondary" id="addFactEventButton"
+                                            onclick="addFactEvent(this)" style="font-size: 18px"
+                                            type="button">+
+                                    </button>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-primary mt-4"
+                            type="submit">Save Facts
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    </div>
+</form>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

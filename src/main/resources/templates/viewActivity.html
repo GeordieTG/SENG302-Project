@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>View Activity</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/field.css}">
+    <script th:src="@{/JavaScript/garminActivities.js}"></script>
+    <script th:src="@{/JavaScript/displayLineup.js}"></script>
+    <script th:src="@{/JavaScript/recommendedMeals.js}"></script>
+    <script th:src="@{/JavaScript/icons.js}"></script>
+
+
+    <style>
+        .toast-danger {
+            color: #D9534F; /* Indian red */
+        }
+    </style>
+
+    <link rel="stylesheet" th:href="@{/css/activity.css}">
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}">
+</head>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    let TOKEN = /*[[${_csrf.token}]]*/ '';
+    let caloriesBurned = /*[[${userGarminStatistics != null ? userGarminStatistics.activeKilocalories : 0}]]*/ '';
+        /*]]>*/
+</script>
+<script>
+    function changeBorder(button) {
+        let cardClassList = button.parentNode.parentNode.parentNode.classList
+        if (cardClassList.contains("rounded-bottom-0")) {
+            cardClassList.remove("rounded-bottom-0")
+        } else {
+            cardClassList.add("rounded-bottom-0")
+        }
+    }
+</script>
+<script>
+    function toolTip() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    }
+</script>
+<body class="bg-body-secondary" onload="toolTip(); checkFormation(), updateRecommendedMeals()">
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<!--Activity Card-->
+<div class="container mt-3">
+    <div class="card mb-3 " id="activityDetailsCard">
+        <div class="card-body position-relative ">
+            <div class="d-inline-flex position-absolute p-1  top-0 end-0 align-items-center">
+                <div>
+                    <input id="activityId" th:name="activityId" th:value="${activity.id}"
+                           type="hidden"/>
+                    <input hidden
+                           id="addStatsDiv"
+                           th:value="${#strings.isEmpty(lineup)} == false and ${afterStartTime}">
+                    <a class="btn btn-outline-secondary text-body d-flex justify-content-evenly align-items-center border-0"
+                       id="addStatisticsButton"
+                       th:href="@{'/addActivityStatistics?id=' + ${activity.id}}"
+                       th:if="${type == 'Game' or type == 'Friendly'} and ${afterStartTime} and ${isManager}"
+                       title="Add Line-Up to add stats">
+                        Add Stats
+                        <svg class="bi bi-plus" fill="currentColor" height="16"
+                             viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                    </a>
+                </div>
+                <a class="btn btn-outline-secondary text-body border-0  p-2 m-2"
+                   id="editActivityButton"
+                   th:href="@{'/editActivity?id=' + ${id}}"
+                   th:if="${isManager}">
+                    <svg class="bi bi-pencil-square" fill="currentColor" height="16"
+                         viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                        <path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                              fill-rule="evenodd"/>
+                    </svg>
+                </a>
+            </div>
+
+            <p class="top-0 start-0 position-absolute p-3" id="activityType"
+               style="color: grey" th:text="${type}"></p>
+
+            <div class="d-flex justify-content-center"
+                 style="color: grey">
+                <div th:if="${score == null || score.getOppositionScore() == null}">
+
+                    <span disabled id="startTime"
+                          th:name="startTime" th:text="${startTimeFormatted.split(' ')[0]} + ' - '">
+                    </span>
+
+                    <span disabled id="endTime"
+                          th:name="endTime" th:text="${endTimeFormatted.split(' ')[0]}">
+                    </span>
+                </div>
+
+                <div th:if="${score != null && score.getOppositionScore() != null}">
+
+                    <span disabled id="startTime"
+                          th:name="startTime" th:text="${startTimeFormatted} + ' - '">
+                    </span>
+
+                    <span disabled id="endTime"
+                          th:name="endTime" th:text="${endTimeFormatted}">
+                    </span>
+                </div>
+            </div>
+
+
+            <div class="d-flex mt-4" id="scoreSection" th:if="${activity.team != null}">
+                <div class="col-4 d-flex justify-content-end gap-4 align-items-center"
+                     id="homeTeam">
+                    <img alt="image not found"
+                         class="img-fluid rounded-circle profile-picture"
+                         id="profile-picture-id" style="width: 100px; height: 100px"
+                         th:src="@{${activity.team.image}}">
+                    <span disabled id="team"
+                          th:if="${activity.team}" th:text="${activity.team.name}"
+                          th:onclick="'window.location.href = \'' + @{/viewTeam(id=${activity.team.getId()})} + '\''"></span>
+                </div>
+                <div class="col-4 d-flex justify-content-center align-items-center" id="gameStatus">
+                    <div th:if="${score != null && score.getOppositionScore() != null}">
+                        <h1 th:text="${score.getHomeScore()} + ' - ' + ${score.getOppositionScore()}"></h1>
+                    </div>
+
+                    <div th:if="${score == null  || score.getOppositionScore() == null}">
+                        <h1 th:text="${startTimeFormatted.split(' ')[1]}"></h1>
+                    </div>
+                </div>
+
+                <div class="col-4 d-flex justify-content-start gap-4 align-items-center"
+                     id="oppositionTeam">
+                    <span>Opposition</span>
+
+                    <img alt="image not found"
+                         class="img-fluid rounded-circle profile-picture"
+                         style="width: 100px; height: 100px"
+                         th:src="${'images/oppositionLogo.jpg'}">
+                </div>
+
+
+            </div>
+
+            <hr>
+
+            <p class="d-flex justify-content-center"
+               style="color: grey"
+               th:text="${activity.location.city} +', '+ ${activity.location.country}"></p>
+
+            <p class="d-flex justify-content-center" id="description"
+               th:text="${activity.description}"></p>
+
+        </div>
+    </div>
+
+    <div th:if="${type} == 'Game' or ${type} == 'Friendly'">
+        <div class="card">
+            <div class="card-body position-relative px-3 py-3" id="editLineUp" style="display:
+            none">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <h3>Edit Line-up</h3>
+                    </div>
+                </div>
+                <div class="row justify-content-between">
+                    <div class="col-6">
+                        <form enctype="multipart/form-data" method="post"
+                              th:action="@{/previewLineup}" th:object="${formationForm}">
+                            <input id="id" th:name="id" th:value="${id}" type="hidden"/>
+                            <div class="form-group">
+                                <select class="form-select" id="formation-list-group"
+                                        onchange="showConfirmationModal(this.value)"
+                                        th:field="*{formationId}"
+                                        th:if="${formationSize} != 0">
+                                    <option hidden th:value="None">Select a Formation</option>
+                                    <!--
+                                     Add a non-breaking space before the label to ensure proper rendering -->
+                                    <option th:each="formation: ${formations}"
+                                            th:text="${formation.getFormation()} + ' (' + ${formation.getField()} + ')'"
+                                            th:value="${formation.getFormationId()}"></option>
+                                </select>
+                            </div>
+                            <!-- Confirm Modal -->
+                            <div aria-hidden="true" aria-labelledby="confirmModalLabel"
+                                 class="modal fade"
+                                 id="confirmModal" role="dialog"
+                                 tabindex="-1">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="confirmModalLabel">Are
+                                                You Sure?</h5>
+                                            <button aria-label="Close" class="btn-close"
+                                                    data-bs-dismiss="modal"
+                                                    type="button"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Change formations? You will lose your current
+                                            Line-Up
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary"
+                                                    data-bs-dismiss="modal"
+                                                    type="button">Cancel
+                                            </button>
+                                            <button class="btn btn-primary" id="changeFormationBtn"
+                                                    type="submit">Change Formation
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!-- Button trigger modal -->
+
+
+                            <!-- Modal -->
+                            <div aria-hidden="true" aria-labelledby="cancelModalLabel" class="modal fade"
+                                 id="cancelModal" tabindex="-1">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="cancelModalLabel">Are
+                                                You Sure?</h5>
+                                            <button aria-label="Close" class="btn-close"
+                                                    data-bs-dismiss="modal"
+                                                    type="button"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Cancel Changes? You will lose your current Line-Up
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary"
+                                                    data-bs-dismiss="modal"
+                                                    type="button">Keep Editing
+                                            </button>
+                                            <button class="btn btn-danger"
+                                                    id="cancelLineUp"
+                                                    onclick="window.location.reload();" type="submit">Remove
+                                                All Changes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="col-md-4 text-end">
+                        <form enctype="multipart/form-data" method="post"
+                              onsubmit="return createLineupString();"
+                              th:action="@{/createLineup}">
+                            <input id="saveFormation" th:name="saveFormation"
+                                   th:value="${saveFormation}" type="hidden"/>
+                            <input th:name="activityId" th:value="${activity.id}"
+                                   type="hidden"/>
+
+                            <input id="formationId" th:name="formationId" type="hidden"/>
+                            <button class="btn btn-danger" data-bs-target="#cancelModal"
+                                    data-bs-toggle="modal" id="showCancelbtn"
+                                    onclick="showCancelButton()" th:if="${formationSize} > 0"
+                                    type="button">Cancel
+                            </button>
+                            <button class="btn btn-success" id="saveLineUpBtn"
+                                    th:if="${formationSize} > 0" type="submit">Save
+                            </button>
+                        </form>
+                    </div>
+                    <div class="text-center" th:if="${formationSize} == 0">Team has no
+                        formations
+                    </div>
+
+                </div>
+
+                <!-- edit line-up container -->
+                <div class="col-md-4 text-end">
+                    <a class="btn btn-outline-secondary text-body border-0 position-absolute p-2 top-0 end-0 m-2"
+                       id="switchToDisplayLineUp"
+                       onclick="switchDisplayLineUp()"
+                       th:if="${isManager}">
+                        View Line-up
+                        <svg class="bi bi-eye" fill="currentColor" height="16"
+                             viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5
+                                8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                            <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                        </svg>
+                    </a>
+                </div>
+                <input hidden id="formationForm" th:value="formationForm">
+                <input hidden id="changedFormation" th:value="${changedLineUp}">
+                <div class="d-flex justify-content-center" th:if="${formationSize} != 0" th:value="${formationSize}" id="formationContent">
+                    <div class="card card-bg d-flex flex-column justify-content-between align-items-center m-0 vh-90 w-75"
+                         id="formation">
+                        <img class="img-fluid field" id="field" th:if="${bgImageEdit}"
+                             th:src="@{${bgImageEdit}}"/>
+                        <div class="formation">
+                            <div class="row w-100 align-items-center justify-content-evenly"
+                                 id="formationGenerator"
+                                 th:each="row, rowIndex : ${#strings.arraySplit(formationForm.formationDisplay, '-')}">
+                                <div class="col d-flex h-50 w-50 justify-content-center align-items-center"
+                                     th:each="i: ${#numbers.sequence(row , 1, -1)}">
+                                    <div class="dropdown align-items-center d-flex flex-column">
+                                        <img alt="Image"
+                                             class="img-fluid rounded-circle profile-picture border border-secondary"
+                                             style="width: 2rem; ; height: 2rem"
+                                             th:id="${'p'+i + 'Img' +rowIndex.index}"
+                                             th:src="@{'images/default.jpg'}"/>
+                                        <select class="form-select players-select my-1 smaller-select"
+                                                onchange="displayUserProfile(this);"
+                                                style="font-size: 12px; height: 2rem;"
+                                                th:id="${'p'+ i + '-' +rowIndex.index}">
+                                            <option selected value="">Select player</option>
+                                            <th:block
+                                                    th:each="player: ${activity.team.getTeamRoles()}">
+                                                <option th:text="${player.getUser().firstName + ' ' + player.getUser().lastName}"
+                                                        th:value="${player.getUser().id}"></option>
+                                            </th:block>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center mt-1">
+                    <a class="btn btn-primary align-middle" id="createFormationButton"
+                       th:href="@{'/createFormation?id=' + ${activity.team.getId()}}"
+                       th:if="${isManager} == true"
+                       type="button">
+                        Create Formation
+                    </a>
+                </div>
+
+                <!--Substitution Positions-->
+                <div id="substitutions" style="display: none;">
+                    <h4 class="mt-5">Substitutions</h4>
+                    <div class="d-flex justify-content-evenly mt-4">
+                        <div th:each="i : ${#numbers.sequence(0, 4)}">
+                            <div class="dropdown align-items-center d-flex flex-column">
+                                <img alt="Image"
+                                     class="img-fluid rounded-circle profile-picture border border-secondary"
+                                     style="width: 2rem; height: 2rem"
+                                     th:id="${'psImg' + i}" th:src="@{'images/default.jpg'}"/>
+                                <select class="form-select players-select my-1"
+                                        onchange="displayUserProfile(this);"
+                                        style="width: 144px; font-size: 12px; height: 2rem;"
+                                        th:id="${'ps-' + i}">
+                                    <option selected value="">Select player</option>
+                                    <th:block th:each="player: ${activity.team.getTeamRoles()}">
+                                        <option th:text="${player.getUser().firstName + ' ' + player.getUser().lastName}"
+                                                th:value="${player.getUser().id}"></option>
+                                    </th:block>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="position-fixed bottom-0 start-0 p-3" style="z-index: 11;">
+                    <div aria-atomic="true" aria-live="assertive"
+                         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+                         id="lineUpErrorToast" role="alert">
+                        <div class="d-flex align-items-center justify-content-between p-2">
+                            <div class="toast-body d-flex align-items-center gap-1">
+                                <svg class="bi bi-exclamation-diamond-fill" fill="#D9534F"
+                                     height="2rem" viewBox="0 0 16 16" width="2rem"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                </svg>
+                                <p class="m-0 h5 toast-danger">Line-Up must be filled out (Not
+                                    including Substitutes)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- display line-up container -->
+            <div class="card-body px-3 py-3" id="displayLineUp" style="display: block">
+                <div class="row justify-content-between align-items-center">
+                    <div class="row justify-content-between">
+                        <div class="col-6">
+                            <h3>Current Line-up</h3>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button class="btn pe-auto btn-outline-secondary text-body border-0 position-absolute p-2 top-0 end-0 m-2"
+                               id="switchToEditLineUp"
+                               onclick="switchDisplayLineUp()" th:attr="data-bs-toggle=${score.getOppositionScore() != null and activity.position != null ? 'tooltip' : ''}, title=${score.getOppositionScore() != null and activity.position != null ? 'Cannot edit lineup if there are recorded statistics' : ''}"  data-bs-placement="top"
+                               th:if="${isManager}"
+                               th:disabled="${score.getOppositionScore() != null and activity.position != null}">
+                                Edit Line-up
+                                <svg class="bi bi-pencil-square" fill="currentColor" height="16"
+                                     viewBox="0 0 16 16" width="16"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                    <path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                                          fill-rule="evenodd"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${#strings.isEmpty(lineup)} == false">
+                    <input id="lineup" th:value="${lineup}" type="hidden">
+                    <input id="lineupDB" type="hidden">
+                    <input id="subs" th:value="${subs}" type="hidden">
+                    <input id="fieldSport" th:value="${formationForm.sport}" type="hidden">
+                    <div class="d-flex justify-content-center">
+                        <div class="card card-bg d-flex flex-column justify-content-between align-items-center m-0 vh-90 w-75"
+                             id="formationDisplay">
+                            <img alt="Image" class="img-fluid field"
+                                 id="fieldDisplay"
+                                 th:src="@{${bgImage}}">
+                            <div class="formation">
+                                <div class="row w-100 align-items-center flex-nowrap justify-content-evenly"
+                                     id="currentLineUpGenerator"
+                                     th:each="row, rowIndex : ${#strings.arraySplit(lineup, '-')}">
+                                    <div class="col h-100"
+                                         th:each="playerID, rowIndex : ${#strings.arraySplit(row, ',')}">
+                                        <div class="align-items-center d-flex flex-column">
+                                            <img alt="Image"
+                                                 width="32px" height="32px"
+                                                 class="rounded-circle formation-player-pictures border border-secondary"
+                                                 th:id="${'li' + playerID}"
+                                                 th:src="@{'/images/default.jpg'}"/>
+
+
+
+
+                                            <div class="accordion" th:id="'accordionPlayer' + ${playerID}">
+                                                <div class="card">
+                                                    <div class=" card-header p-1" th:id="'headingPlayer' + ${playerID}">
+                                                        <div class="d-flex justify-content-center align-items-center">
+                                                            <button th:id="${'ln'+playerID}" onclick="changeBorder(this)" class="btn btn-sm formation-player-name text-center d-flex flex-nowrap" type="button" data-bs-toggle="collapse" th:data-bs-target="'#collapsePlayer' + ${playerID}" aria-expanded="false" th:aria-controls="'collapsePlayer'+ ${playerID}">
+                                                            </button>
+                                                            <svg  class="bi-award text-center" th:if="${scoreFacts.?[user.id == '__${playerID}__']}" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+                                                                <path d="M9.669.864 8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193.684 1.365 1.086 1.072L12.387 6l.248 1.506-1.086 1.072-.684 1.365-1.51.229L8 10.874l-1.355-.702-1.51-.229-.684-1.365-1.086-1.072L3.614 6l-.25-1.506 1.087-1.072.684-1.365 1.51-.229L8 1.126l1.356.702 1.509.229z"/>
+                                                                <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1 4 11.794z"/>
+                                                            </svg>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div  th:id="'collapsePlayer' + ${playerID}" class="collapse" th:aria-labelledby="'headingPlayer' + ${playerID}" th:data-bs-parent="'#accordionPlayer' + ${playerID}">
+                                                        <div class="card card-body rounded-top-0 position-absolute end-0" style="margin: -1px; width: 102%; z-index: 2">
+                                                            <div class="d-flex flex-column align-items-center gap-2 justify-content-center">
+                                                                <th:block th:each="scoreFact: ${scoreFacts}" th:if="${playerID} == (${scoreFact.getUser().getId()})">
+                                                                    <div class="d-flex gap-1 align-items-center">
+                                                                        <svg class="bi bi-award bi-arrow-left-right"
+                                                                             fill="currentColor"
+                                                                             height="16"
+                                                                             viewBox="0 0 16 16"
+                                                                             width="16"
+                                                                             xmlns="http://www.w3.org/2000/svg">
+                                                                            <path d="M9.669.864 8 0 6.331.864l-1.858.282-.842 1.68-1.337 1.32L2.6 6l-.306 1.854 1.337 1.32.842 1.68 1.858.282L8 12l1.669-.864 1.858-.282.842-1.68 1.337-1.32L13.4 6l.306-1.854-1.337-1.32-.842-1.68L9.669.864zm1.196 1.193.684 1.365 1.086 1.072L12.387 6l.248 1.506-1.086 1.072-.684 1.365-1.51.229L8 10.874l-1.355-.702-1.51-.229-.684-1.365-1.086-1.072L3.614 6l-.25-1.506 1.087-1.072.684-1.365 1.51-.229L8 1.126l1.356.702 1.509.229z"/>
+                                                                            <path d="M4 11.794V16l4-1 4 1v-4.206l-2.018.306L8 13.126 6.018 12.1 4 11.794z"/>
+                                                                        </svg>
+
+                                                                        <p class="m-0" th:text="${scoreFact.getScoredTime()} + '\''"></p>
+                                                                    </div>
+                                                                </th:block>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center" th:if="${#strings.isEmpty(lineup)} == true">
+                    Team has no line-ups
+                </div>
+
+                <!--Substitution Positions-->
+                <div id="displaySubstitution"
+                     th:if="${#strings.isEmpty(subs)} == false">
+                    <h4 class="mt-5">Substitutions</h4>
+                    <div class="d-flex justify-content-evenly mt-4">
+                        <div class="row w-100 align-items-center justify-content-evenly"
+                             id="currentSubGenerator"
+                             th:each="row, rowIndex : ${#strings.arraySplit(subs, '-')}">
+                            <div class="col d-flex h-50 w-50 justify-content-center align-items-center"
+                                 th:each="playerID, rowIndex : ${#strings.arraySplit(row, ',')}">
+                                <div class="dropdown align-items-center d-flex flex-column">
+                                    <img alt="Image"
+                                         class="img-fluid rounded-circle formation-player-pictures border border-secondary"
+                                         style="width: 2rem; height: 2rem"
+                                         th:id="${'li' + playerID}"
+                                         th:src="@{'images/default.jpg'}"/>
+                                    <h6 class="formation-player-name text-center"
+                                        th:id="${'ln'+playerID}"></h6>
+                                    <div class="d-flex gap-2 ">
+                                        <div class="d-flex gap-1 align-items-center"
+                                             th:each="scoreFact: ${scoreFacts}">
+                                            <svg class="bi bi-arrow-left-right"
+                                                 fill="currentColor" height="16"
+                                                 th:if="${playerID} == (${scoreFact.getUser().getId()})"
+                                                 viewBox="0 0 16 16"
+                                                 width="16" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0ZM5.5 4.002V12h1.283V9.164h1.668C10.033 9.164 11 8.08 11 6.586c0-1.482-.955-2.584-2.538-2.584H5.5Zm2.77 4.072c.893 0 1.419-.545 1.419-1.488s-.526-1.482-1.42-1.482H6.778v2.97H8.27Z"/>
+                                            </svg>
+                                            <p class="m-0"
+                                               th:if="${playerID} == (${scoreFact.getUser().getId()})"
+                                               th:text="${scoreFact.getScoredTime()} + '\''"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Team statistics section       -->
+    <div class="card h-20 mt-3 p-4" id="teamStats" th:if="${activity.team != null}">
+        <h3>Team Statistics</h3>
+        <div class="card-body d-flex gap-3" style="display: block">
+            <div class="col-4 card p-3">
+                <h5>Facts</h5>
+                <div>
+                    <a class="btn btn-outline-secondary text-body border-0 position-absolute p-1 top-0 end-0 m-2"
+                       id="addActivityFactsButton"
+                       th:href="@{'/addActivityFacts?id=' + ${activity.id}}"
+                       th:if="${afterStartTime}">
+                        <svg class="bi bi-plus" fill="currentColor" height="16"
+                             viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="d-flex justify-content-center align-items-center h-75"
+                     style="min-height: 5rem" th:if="${facts.size() == 0}">No Facts
+                </div>
+
+
+                <div class="d-flex align-items-center flex-column">
+                    <div class="row w-100 justify-content-center justify-content-lg-start">
+                        <div class="col-8 col-lg-6" th:each="fact : ${facts}">
+                            <p class="p-2 text-center">[[${fact}]]</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-8 card p-3">
+                <h5>Substitutions</h5>
+                <div class="d-flex justify-content-center align-items-center h-75"
+                     th:if="${subFacts.size() == 0}">No Substitutions Made
+                </div>
+
+                <div class="row w-100 justify-content-center justify-content-lg-start">
+                    <div class="d-flex gap-2 align-items-center col-8 col-lg-6 my-2"
+                         th:each="subFact: ${subFacts}">
+                        <div class=" p-2 text-center">
+                            <img alt=""
+                                 class="rounded-circle" style="width: 2rem; height: 2rem"
+                                 th:src="@{${subFact.getSubstitutePlayer().getProfilePicture()}}">
+                            <span th:text="${subFact.getSubstitutePlayer().getFirstName()} + ' ' + ${subFact.getSubstitutePlayer().getLastName()}"></span>
+
+                            <svg class="bi bi-arrow-left-right" fill="currentColor" height="16"
+                                 viewBox="0 0 16 16" width="16"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"
+                                      fill-rule="evenodd"/>
+                            </svg>
+
+                            <img alt=""
+                                 class="rounded-circle" style="width: 2rem; height: 2rem"
+                                 th:src="@{${subFact.getSubstitutedPlayer().getProfilePicture()}}">
+                            <span th:text="${subFact.getSubstitutedPlayer().getFirstName()} + ' ' + ${subFact.getSubstitutedPlayer().getLastName()}"></span>
+
+                            <span th:text="${subFact.getSubstituteTime()} + '\''"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Personal statistics section -->
+    <div class="card h-20 mt-3 p-4" id="personalStats" th:if="${type == 'Game' || type == 'Friendly'}">
+        <h3>Personal Statistics</h3>
+
+        <h5 class="pt-3" th:text="'Total Time Played (Minutes): ' + ${playerTotalTime}"></h5>
+
+        <div class="card-body d-flex gap-3" style="display: block">
+
+            <div class="col-6 card p-3">
+                <h5 class="mb-3">Points</h5>
+
+                <div class="d-flex justify-content-center align-items-center h-75"
+                     style="min-height: 5rem" th:if="${personalPoints.size() == 0}">No Points
+                </div>
+
+
+                <div class="d-flex align-items-center flex-column">
+                    <div class="row w-100 justify-content-center justify-content-lg-start">
+                        <div class="col-8 col-lg-4" th:each="scoringEvent : ${personalPoints}">
+                            <p class="m-1 text-center" style="color: grey" th:text="'Scored '
+                                + ${scoringEvent.getScore()} + ' at '
+                                + ${scoringEvent.getScoredTime()} + '\''"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 card p-3">
+                <h5>Substitutions</h5>
+                <div class="d-flex justify-content-center align-items-center h-75"
+                     th:if="${personalSubFacts.size() == 0}">No Substitutions Made
+                </div>
+
+                <div class="row w-100 justify-content-center justify-content-lg-start">
+                    <div class="d-flex gap-2 align-items-center col-8 col-lg-6 my-2"
+                         th:each="subFact: ${personalSubFacts}">
+                        <div class="p-2 text-center"
+                             th:if="${subFact.getSubstitutePlayer().getId() == playerID || subFact.getSubstitutedPlayer().getId() == playerID}">
+                            <img alt=""
+                                 class="rounded-circle" style="width: 2rem; height: 2rem"
+                                 th:src="@{${subFact.getSubstitutePlayer().getProfilePicture()}}">
+                            <span th:text="${subFact.getSubstitutePlayer().getFirstName()} + ' ' + ${subFact.getSubstitutePlayer().getLastName()}"></span>
+
+                            <svg class="bi bi-arrow-left-right" fill="currentColor" height="16"
+                                 viewBox="0 0 16 16" width="16"
+                                 xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5zm14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5z"
+                                      fill-rule="evenodd"/>
+                            </svg>
+
+                            <img alt=""
+                                 class="rounded-circle" style="width: 2rem; height: 2rem"
+                                 th:src="@{${subFact.getSubstitutedPlayer().getProfilePicture()}}">
+                            <span th:text="${subFact.getSubstitutedPlayer().getFirstName()} + ' ' + ${subFact.getSubstitutedPlayer().getLastName()}"></span>
+
+                            <span th:text="${subFact.getSubstituteTime()} + '\''"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommended Meals Modal -->
+    <div class="modal fade" id="recommendedMealsModal" tabindex="-1" role="dialog" aria-labelledby="recommendedMealsModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="d-flex flex-column">
+                        <h5 class="modal-title" id="recommendedMealsModalTitle">
+                            Recommended Meals
+                        </h5>
+                        <p class="text-muted fst-italic m-0">Based on your diet preference for:</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            id="closeRecommendedMealsModal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body ">
+                    <div  class="d-flex justify-content-center position-relative mb-3 align-items-center">
+                        <p class="m-0 text-body" style="text-transform: capitalize" th:text="${intakePreference}"></p>
+                        <a class="btn btn-outline-secondary border-0 position-absolute end-0 text-body" onclick="toProfilePage()">
+                            <svg class="bi bi-pencil-square" fill="currentColor" height="16"
+                                 viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                <path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                                      fill-rule="evenodd"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <!--Meal One-->
+                    <div
+                            th:insert="~{fragments/recommendedMeal.html :: recommendedMeal('Chicken Tika Masala Naan Tacos', '🌮', '500', '18.2g', '4.5g', '6.7g', '0', 'Chicken 250g, Tacos 50g', 0)}"></div>
+
+                    <!--Meal Two-->
+                    <div
+                            th:insert="~{fragments/recommendedMeal.html :: recommendedMeal('Mushroom Salad', '🥗', '500', '18.2g', '4.5g', '6.7g', '1', 'Mushroom 100g, Salad 1kg', 1)}"></div>
+
+                    <!--Meal Three-->
+                    <div
+                            th:insert="~{fragments/recommendedMeal.html :: recommendedMeal('Steak on Rice with Mixed Greens', '🥩', '500', '18.2g', '4.5g', '6.7g', '2', 'Steak 250g, Rice 100g, Mixed Greens 100g', 2)}"></div>
+                    <div id="mealModalButtonsDiv" class="text-center">
+                        <button id="recommendedMealRefreshBtn" class="btn btn-danger"
+                                onclick="updateRecommendedMeals()">
+                            Refresh</button>
+                    </div>
+                </div>
+
+
+
+                <button id="confirmMealBtn" class="btn btn-primary rounded-top-0" disabled onclick="saveMeals()">
+                    Confirm Meals
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Garmin Statistics Section -->
+    <div class="card h-20 my-3 p-4" id="garminStats">
+        <h3>Garmin Statistics</h3>
+        <p class="text-center mt-4" th:if="${userGarminStatistics == null}">No Garmin Activity Connected</p>
+
+        <div class="d-flex flex-column justify-content-evenly align-items-center" th:if="${userGarminStatistics != null}">
+            <div class="row g-2 w-100">
+                <!--Max Heart Rate-->
+                <div class="col-md-6 mt-2">
+                    <div class="d-flex card" style="height:125px">
+                        <div class="row h-100">
+                            <div class="col-5 justify-content-end align-items-center d-flex">
+                                <svg style="fill:#f13030;" xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512">
+                                    <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                    <style>svg{font-size: 50px}</style>
+                                    <path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/>
+                                </svg>
+                                ️
+                            </div>
+                            <div class="col-6 justify-content-center align-items-center d-flex">
+                                <div class="card-body">
+                                    <p class="fw-bold"
+                                       style="margin-bottom: 0; font-size: 30px"
+                                       th:text="${userGarminStatistics.maxHeartRate}"></p>
+                                    <p style="margin-bottom: 0; color: grey">Max Heart Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Heart Rate-->
+                <div class="col-md-6">
+                    <div class="card" style="height:125px">
+                        <div class="row h-100">
+                            <div class="col-6 justify-content-end align-items-center d-flex">
+                                <svg width="50px" height="50px" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class=" bi-activity" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M6 2a.5.5 0 0 1 .47.33L10 12.036l1.53-4.208A.5.5 0 0 1 12 7.5h3.5a.5.5 0 0 1 0 1h-3.15l-1.88 5.17a.5.5 0 0 1-.94 0L6 3.964 4.47 8.171A.5.5 0 0 1 4 8.5H.5a.5.5 0 0 1 0-1h3.15l1.88-5.17A.5.5 0 0 1 6 2Z"/>
+                                </svg>
+                            </div>
+                            <div class="col-6 justify-content-center align-items-center d-flex">
+                                <div class="card-body">
+                                    <p class="fw-bold"
+                                       style="margin-bottom: 0; font-size: 30px"
+                                       th:text="${userGarminStatistics.averageHeartRate}"></p>
+                                    <p style="margin-bottom: 0; color: grey">Average Heart
+                                        Rate</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!--Calories Burnt-->
+                <div class="col-md-6">
+                    <div class="d-flex card" style="height:125px">
+                        <div class="row h-100">
+                            <div class="col-5 justify-content-end align-items-center d-flex">
+                                <svg height="1em"
+                                     style="fill: #FF8966; font-size: 40px"
+                                     viewBox="0 0 448 512"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                    <path d="M159.3 5.4c7.8-7.3 19.9-7.2 27.7 .1c27.6 25.9 53.5 53.8 77.7 84c11-14.4 23.5-30.1 37-42.9c7.9-7.4 20.1-7.4 28 .1c34.6 33 63.9 76.6 84.5 118c20.3 40.8 33.8 82.5 33.8 111.9C448 404.2 348.2 512 224 512C98.4 512 0 404.1 0 276.5c0-38.4 17.8-85.3 45.4-131.7C73.3 97.7 112.7 48.6 159.3 5.4zM225.7 416c25.3 0 47.7-7 68.8-21c42.1-29.4 53.4-88.2 28.1-134.4c-4.5-9-16-9.6-22.5-2l-25.2 29.3c-6.6 7.6-18.5 7.4-24.7-.5c-16.5-21-46-58.5-62.8-79.8c-6.3-8-18.3-8.1-24.7-.1c-33.8 42.5-50.8 69.3-50.8 99.4C112 375.4 162.6 416 225.7 416z"/>
+                                </svg>
+                            </div>
+                            <div class="col-6 justify-content-center align-items-center d-flex">
+                                <div class="card-body">
+                                    <p class="fw-bold"
+                                       style="margin-bottom: 0; font-size: 30px"
+                                       th:text="${userGarminStatistics.activeKilocalories}"></p>
+                                    <p style="margin-bottom: 0; color: grey">calories burnt</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Distance Travelled-->
+                <div class="col-md-6">
+                    <div class="card" style="height:125px">
+                        <div class="row h-100">
+                            <div class="col-5 justify-content-end align-items-center d-flex">
+                                <svg height="1em"
+                                     style="fill: #B6D094; font-size: 40px"
+                                     viewBox="0 0 448 512"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                    <path d="M210.6 5.9L62 169.4c-3.9 4.2-6 9.8-6 15.5C56 197.7 66.3 208 79.1 208H104L30.6 281.4c-4.2 4.2-6.6 10-6.6 16C24 309.9 34.1 320 46.6 320H80L5.4 409.5C1.9 413.7 0 419 0 424.5c0 13 10.5 23.5 23.5 23.5H192v32c0 17.7 14.3 32 32 32s32-14.3 32-32V448H424.5c13 0 23.5-10.5 23.5-23.5c0-5.5-1.9-10.8-5.4-15L368 320h33.4c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16L344 208h24.9c12.7 0 23.1-10.3 23.1-23.1c0-5.7-2.1-11.3-6-15.5L237.4 5.9C234 2.1 229.1 0 224 0s-10 2.1-13.4 5.9z"/>
+                                </svg>
+                            </div>
+                            <div class="col-6 align-items-center d-flex">
+                                <div class="card-body">
+                                    <p class="fw-bold"
+                                       style="margin-bottom: 0; font-size: 30px"
+                                       th:text="${userGarminStatistics.distanceInMeters} + m"></p>
+                                    <p style="margin-bottom: 0; color: grey">distance
+                                        travelled</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Total Exercise Time-->
+                <div class="col-md-12">
+                    <div class="card d-flex justify-content-center align-items-center"
+                         style="height: 90px">
+                        <p class="fw-bold" style="margin-bottom: 0; font-size:30px"
+                           th:text="${exerciseHours} + 'h ' + ${exerciseMinutes} + 'm ' + ${exerciseSeconds} + 's'">
+                            34m</p>
+                        <p style="margin-bottom: 0; color:grey">Total Exercise Time</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="d-inline-flex position-absolute p-3 top-0 end-0 align-items-center">
+            <div th:if="${userGarminStatistics != null}" id="recommendedMealsDiv" >
+                <button data-bs-toggle="modal" data-bs-target="#recommendedMealsModal" class="btn btn-outline-secondary d-flex justify-content-evenly align-items-center border-0"
+                        id="recommendedMealsButton">Recommended Meals</button>
+            </div>
+
+            <button data-bs-target="#activityModal"
+                    data-bs-toggle="modal" id="showGarminActivities" onclick="getIconSvg()"
+                    class="btn btn-outline-secondary border-0"
+                    type="Button" th:if="${connected}">
+                Add Garmin Activities
+            </button>
+            <button id="showNotConnectedToast"
+                    class="btn btn-outline-secondary border-0"
+                    type="Button" th:unless="${connected}" onclick="popNotConnectedToast()">
+                Add Garmin Activities
+            </button>
+        </div>
+
+    </div>
+
+    <div class="position-fixed m-2 start-0 bottom-0">
+        <!-- Not connected Toast    -->
+        <div aria-atomic="true"
+             aria-live="assertive"
+             class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+             id="notConnectedToast"
+             role="alert">
+            <div class="d-flex align-items-center justify-content-between p-2">
+                <div class="toast-body d-flex align-items-center gap-1">
+                    <svg class="bi bi-exclamation-diamond-fill"
+                         fill="#D9534F"
+                         height="2rem" viewBox="0 0 16 16"
+                         width="2rem"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    <p class="m-0 h5 toast-danger">Garmin watch is not connected.</p>
+                </div>
+            </div>
+        </div>
+        <div aria-atomic="true"
+             aria-live="assertive"
+             class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+             id="garminActivityToast"
+             role="alert">
+            <div class="d-flex align-items-center justify-content-between p-2">
+                <div class="toast-body d-flex align-items-center gap-1" id="garminActivityToastBody">
+                    <svg class="bi bi-exclamation-diamond-fill"
+                         fill="#D9534F"
+                         height="2rem" viewBox="0 0 16 16"
+                         width="2rem"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    <ul class="m-0 d-flex flex-column gap-3" id="garminToastErrors">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity modals -->
+    <div aria-hidden="true" aria-labelledby="activityModalLabel" class="modal fade"
+         id="activityModal" tabindex="-1">
+        <div class="modal-dialog-centered modal-dialog w-75" style="max-width: none" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="activityModalLabel">Today's Garmin Activities</h5>
+                    <button aria-label="Close" class="btn-close"
+                            data-bs-dismiss="modal"
+                            type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row gap-xl-0 gap-2">
+                        <p th:if="${garminActivities.size() == 0}">
+                            You have no garmin activities from today.
+                        </p>
+                        <div class="col mt-0 mt-xl-2 radio" th:unless="${garminActivities.size() == 0}" th:each="garminActivity, iter : ${garminActivities}">
+
+                            <label th:for="'garminCard' + ${iter.index}" class="w-100">
+                                <div class="card clickableCard">
+                                    <input type="hidden" th:value="${garminActivity.activityId}" name="activityId">
+                                    <input type="hidden" th:value="${garminActivity.activityType}" name="activityType">
+                                    <input type="hidden" th:value="${garminActivity.startTime}" name="startTime">
+                                    <input type="hidden" th:value="${garminActivity.activeKilocalories}" name="activeKilocalories">
+                                    <input type="hidden" th:value="${garminActivity.durationInSeconds}" name="durationInSeconds">
+                                    <input type="hidden" th:value="${garminActivity.distanceInMeters}" name="distanceInMeters">
+                                    <input type="hidden" th:value="${garminActivity.averageHeartRate}" name="averageHeartRate">
+                                    <input type="hidden" th:value="${garminActivity.maxHeartRate}" name="maxHeartRate">
+                                    <div class="card-body">
+                                        <!-- Display other activity details here -->
+                                        <input type="radio" th:id="'garminCard' + ${iter.index}" onchange="changeBackground(this)" hidden name="selectedGarminActivity">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <!-- SVG icon for TYPE -->
+                                            <!--                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-arms-up" viewBox="0 0 16 16">-->
+                                            <!--                                            <path d="M8 3a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>-->
+                                            <!--                                            <path d="m5.93 6.704-.846 8.451a.768.768 0 0 0 1.523.203l.81-4.865a.59.59 0 0 1 1.165 0l.81 4.865a.768.768 0 0 0 1.523-.203l-.845-8.451A1.492 1.492 0 0 1 10.5 5.5L13 2.284a.796.796 0 0 0-1.239-.998L9.634 3.84a.72.72 0 0 1-.33.235c-.23.074-.665.176-1.304.176-.64 0-1.074-.102-1.305-.176a.72.72 0 0 1-.329-.235L4.239 1.286a.796.796 0 0 0-1.24.998l2.5 3.216c.317.316.475.758.43 1.204Z"/>-->
+                                            <!--                                        </svg>-->
+                                            <div class="garmin-activity-icon"
+                                                 data-th-value="${garminActivity.activityType}"></div>
+                                            <p class="p-2" style="font-size: 22px;"
+                                               th:text="${garminActivity.activityType}"></p>
+
+
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <!-- SVG icon for Start Time -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                                 fill="currentColor" class="bi bi-calendar-date" viewBox="0 0 16 16"><path d="M6.445 11.688V6.354h-.633A12.6 12.6 0 0 0 4.5 7.16v.695c.375-.257.969-.62 1.258-.777h.012v4.61h.675zm1.188-1.305c.047.64.594 1.406 1.703 1.406 1.258 0 2-1.066 2-2.871 0-1.934-.781-2.668-1.953-2.668-.926 0-1.797.672-1.797 1.809 0 1.16.824 1.77 1.676 1.77.746 0 1.23-.376 1.383-.79h.027c-.004 1.316-.461 2.164-1.305 2.164-.664 0-1.008-.45-1.05-.82h-.684zm2.953-2.317c0 .696-.559 1.18-1.184 1.18-.601 0-1.144-.383-1.144-1.2 0-.823.582-1.21 1.168-1.21.633 0 1.16.398 1.16 1.23z"/><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/></svg>
+
+                                            <p class="p-2" th:text="${garminActivity.startTimeFormatted}"></p>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <!-- SVG icon for Active Kilocalorie -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" height="32" viewBox="0 0 448 512"><!--
+                                ! Font Awesome Free
+        6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M159.3 5.4c7.8-7.3 19.9-7.2 27.7 .1c27.6 25.9 53.5 53.8 77.7 84c11-14.4 23.5-30.1 37-42.9c7.9-7.4 20.1-7.4 28 .1c34.6 33 63.9 76.6 84.5 118c20.3 40.8 33.8 82.5 33.8 111.9C448 404.2 348.2 512 224 512C98.4 512 0 404.1 0 276.5c0-38.4 17.8-85.3 45.4-131.7C73.3 97.7 112.7 48.6 159.3 5.4zM225.7 416c25.3 0 47.7-7 68.8-21c42.1-29.4 53.4-88.2 28.1-134.4c-4.5-9-16-9.6-22.5-2l-25.2 29.3c-6.6 7.6-18.5 7.4-24.7-.5c-16.5-21-46-58.5-62.8-79.8c-6.3-8-18.3-8.1-24.7-.1c-33.8 42.5-50.8 69.3-50.8 99.4C112 375.4 162.6 416 225.7 416z"/></svg>
+
+                                            <p class="p-2" th:text="${garminActivity.activeKilocalories}+' cal'"></p>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <!-- SVG icon for Duration -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" height="32" fill="currentColor" viewBox="0 0 384 512"><!--
+                                ! Font Awesome Free
+            6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License)
+            Copyright 2023 Fonticons, Inc. --><path d="M32 0C14.3 0 0 14.3 0 32S14.3 64 32 64V75c0 42.4 16.9 83.1 46.9 113.1L146.7 256 78.9 323.9C48.9 353.9 32 394.6 32 437v11c-17.7 0-32 14.3-32 32s14.3 32 32 32H64 320h32c17.7 0 32-14.3 32-32s-14.3-32-32-32V437c0-42.4-16.9-83.1-46.9-113.1L237.3 256l67.9-67.9c30-30 46.9-70.7 46.9-113.1V64c17.7 0 32-14.3 32-32s-14.3-32-32-32H320 64 32zM288 437v11H96V437c0-25.5 10.1-49.9 28.1-67.9L192 301.3l67.9 67.9c18 18 28.1 42.4 28.1 67.9z"/></svg>
+
+                                            <p class="p-2" th:text="${garminActivity.durationInSeconds / 60} + ' mins'"></p>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <!-- SVG icon for Distance in Meter -->
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
+                                                 fill="currentColor" class="bi bi-signpost-2-fill" viewBox="0 0 16 16">
+                                                <path d="M7.293.707A1 1 0 0 0 7 1.414V2H2a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h5v1H2.5a1 1 0 0 0-.8.4L.725 8.7a.5.5 0 0 0 0 .6l.975 1.3a1 1 0 0 0 .8.4H7v5h2v-5h5a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1H9V6h4.5a1 1 0 0 0 .8-.4l.975-1.3a.5.5 0 0 0 0-.6L14.3 2.4a1 1 0 0 0-.8-.4H9v-.586A1 1 0 0 0 7.293.707z"/>
+                                            </svg>
+
+                                            <p class="p-2" th:text="${garminActivity.distanceInMeters} + ' m'"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                            type="button" onclick="saveGarminActivity()"> Save
+                    </button>
+                    <button class="btn btn-danger"
+                            id="cancelGarmin"
+                            data-bs-dismiss="modal" type="submit">Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="position-fixed bottom-0 start-0 p-3 " style="z-index: 11">
+    <div class="toast w-auto align-items-center text-success bg-success bg-opacity-25 border-start border-danger border-5 border-0" role="alert" id="addedMealsToast" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                </svg>
+                <p class="m-0 h5">Added Meals</p>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:src="@{/JavaScript/displayPlayerInLineup.js}"></script>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

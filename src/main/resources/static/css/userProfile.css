@@ -1,0 +1,85 @@
+
+.profilePicture {
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-position: center center;
+    object-fit: cover;
+}
+
+.userProfile {
+    text-align: center;
+}
+
+.label-and-description {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.description {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.user-details {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+}
+
+#teamBanner {
+    width: 100%;
+    height: 50vh;
+    position: relative;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: white;
+}
+
+#teamInfo {
+    max-height: 35%
+}
+
+#profileInfo {
+    max-height: 35%
+}
+
+.teamLogo {
+    width: 200px;
+    height: 200px;
+    margin-top: -110px;
+    object-fit: cover;
+}
+
+.bi {
+    width: 2rem;
+    height: 2rem;
+}
+
+.bi-arrow-left-right {
+    width: 1rem;
+    height: 1rem;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(var(--bs-body-bg-rgb), 0.5);
+
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+}

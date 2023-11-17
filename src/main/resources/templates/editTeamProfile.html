@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Team Profile</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <script th:src="@{/JavaScript/TeamProfile.js}"></script>
+    <script th:src="@{/JavaScript/locationAPI.js}"></script>
+    <script th:src="@{/JavaScript/roles.js}"></script>
+    <style>
+        .toast-danger {
+            color: #D9534F; /* Indian red */
+        }
+    </style>
+</head>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    function changeDisplay() {
+        let invalidFirstTab = [[${invalidFirstTab}]]
+        let invalidSecondTab = [[${invalidTeamSecondTab}]]
+        let tab = [[${tab}]]
+        changeDisplayTeam(invalidFirstTab, invalidSecondTab, tab)
+    }
+
+    /*]]>*/
+</script>
+<body class="bg-body-secondary" onload="changeDisplay()"
+      style="background-repeat: no-repeat;">
+<div>
+    <header th:replace="~{fragments/header.html :: header}"></header>
+    <form method="post" th:action="@{editTeamProfile}" th:object="${editTeamForm}">
+        <div class="container">
+            <div class="row justify-content-center my-5">
+                <div class="col-md-8 col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-white">
+                            <ul class="nav nav-tabs card-header-tabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab"
+                                       href="#nav-profile" id="nav-profile-tab"
+                                       th:onclick="changeViewHref('Profile', [[${id}]])">Profile</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#nav-location"
+                                       id="locationTab"
+                                       th:onclick="changeViewHref('Location', [[${id}]])">Location</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#nav-members"
+                                       id="nav-member-tab"
+                                       th:onclick="changeViewHref('Members', [[${id}]])">Member
+                                        Roles</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="nav-profile">
+                                    <div class="text-center">
+                                        <h3 class="card-title">Profile</h3>
+                                    </div>
+                                    <input class="form-control" data-cy="id" id="id"
+                                           readonly th:field="*{id}" th:name="id" type="hidden">
+                                    <div class="form-group mb-3">
+                                        <label for="name"> Team Name: </label>
+                                        <input class="form-control" data-cy="name" id="name"
+                                               placeholder="Name"
+                                               th:field="*{name}" th:name="name"
+                                               th:style="${validName} == false ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div class="invalid-feedback"></div>
+                                        <div id="teamNameError" style="color:red"
+                                             th:if="false == ${validName}">
+                                            [[${teamNameErrorMessage}]]
+                                        </div>
+                                    </div>
+
+                                    <!--Sport Selection-->
+                                    <div class="col-md-12 mb-4">
+                                        <label for="sport">Sport</label>
+                                        <select class="form-select" id="sport" th:disabled="${hasClub}"
+                                                th:name="sport">
+                                            <option th:value="NONE">Select Type</option>
+                                            <option th:each="sport : ${supportedSports}"
+                                                    th:selected="${editTeamForm.getSport().equalsIgnoreCase(sport)}" th:text="${sport}"
+                                                    th:value="${sport}"></option>
+                                        </select>
+                                        <input hidden
+                                               id="hidden-sport" name="sport"
+                                               th:if="${hasClub}" th:value="${editTeamForm.getSport()}">
+                                        <small class="form-text text-danger" id="sportHelp"
+                                               th:if="${validSport == false}"
+                                               th:text="'Please select a sport'"></small>
+                                    </div>
+
+                                    <div class="invalid-feedback">
+                                        Please choose a username.
+                                    </div>
+
+                                    <a class="btn btn-primary" id="editBackBtnProfile"
+                                       th:href="@{'viewTeam?id=' + ${id} + '&showAllTeams=0' + '&tab=' + ${tab}}"
+                                       type="button">Back</a>
+                                    <input class="btn btn-primary" type="submit"
+                                           value="Save Changes">
+                                </div>
+                                <div class="tab-pane fade" id="nav-location"
+                                     th:with="address = ${address1} != '' ? (${address1} + (${address2} != '' ? ', ' + ${address2} : '')) : ${address2}">
+                                    <div class="text-center">
+                                        <h3 class="card-title">Location</h3>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="address1">
+                                            Address Line 1:
+                                        </label>
+                                        <input class="form-control" data-cy="address1" id="address1"
+                                               list="address_list"
+                                               oninput="onInput()"
+                                               onkeyup="timerStartOnKeyUpForAddress()"
+                                               placeholder="Street address"
+                                               th:field="*{address1}"
+                                               th:name="address1"
+                                               th:style="${invalidStreetAddressOne} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <datalist id="address_list"></datalist>
+                                        <div class="errorText"
+                                             style="color: red"
+                                             th:if="${invalidStreetAddressOne == true}">
+                                            [[${streetAddressOneErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="address2">
+                                            Address Line 2:
+                                        </label>
+                                        <input autofocus class="form-control" data-cy="address2"
+                                               id="address2"
+                                               placeholder="Street address continued"
+                                               th:field="*{address2}"
+                                               th:name="address2"
+                                               th:style="${invalidStreetAddressTwo} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div class="errorText"
+                                             style="color: red"
+                                             th:if="${invalidStreetAddressTwo == true}">
+                                            [[${streetAddressTwoErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="suburb">
+                                            Suburb:
+                                        </label>
+                                        <input class="form-control" data-cy="suburb" id="suburb"
+                                               placeholder="Suburb"
+                                               th:field="*{suburb}" th:name="suburb"
+                                               th:style="${invalidSuburb} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div class="errorText" style="color: red"
+                                             th:if="${invalidSuburb == true}">
+                                            [[${suburbErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="city">
+                                            City:
+                                        </label>
+                                        <input autofocus class="form-control" data-cy="city"
+                                               id="city"
+                                               list="city_list"
+                                               onkeyup="timerStartOnKeyUpForCity()"
+                                               placeholder="City"
+                                               th:field="*{city}" th:name="city"
+                                               th:style="${validCity} == false ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <datalist id="city_list"></datalist>
+                                        <div class="errorText" style="color: red"
+                                             th:if="${validCity == false}">[[${cityErrorText}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="country">
+                                            Country:
+                                        </label>
+                                        <input autofocus class="form-control" data-cy="country"
+                                               id="country"
+                                               list="country_list"
+                                               onkeyup="timeStartOnKeyUpForCountry()"
+                                               placeholder="Country" th:field="*{country}"
+                                               th:name="country"
+                                               th:style="${validCountry} == false ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <datalist id="country_list"></datalist>
+                                        <div class="errorText" style="color: red"
+                                             th:if="${validCountry == false}">
+                                            [[${countryErrorText}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="postcode">
+                                            Postcode:
+                                        </label>
+                                        <input class="form-control" data-cy="postcode" id="postcode"
+                                               placeholder="Postcode"
+                                               th:field="*{postcode}" th:name="postcode"
+                                               th:style="${invalidPostcode} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div class="errorText" style="color: red"
+                                             th:if="${invalidPostcode == true}">
+                                            [[${postcodeErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <a class="btn btn-primary" id="editBackBtnLocation"
+                                       th:href="@{'viewTeam?id=' + ${id} + '&showAllTeams=0' + '&tab=' + ${tab}}"
+                                       type="button">Back</a>
+                                    <input class="btn btn-primary" type="submit"
+                                           value="Save Changes">
+                                </div>
+                                <!--                            Members Tab Pane-->
+                                <div class="tab-pane fade" id="nav-members">
+                                    <table class="table table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th id="rolePicture" scope="col">Profile Picture</th>
+                                            <th id="memberName" scope="col">Member Name</th>
+                                            <th id="Role" scope="col">Role</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="team_roles_body">
+                                        <tr th:each="teamRole, status : ${editTeamForm.teamRoles}"
+                                            th:id="team_roles">
+                                            <td>
+                                                <img alt="image not found"
+                                                     class="profilePicture "
+                                                     style="width:2em; height:2em"
+                                                     th:src="@{${teamRole.getUser().getProfilePicture()}}">
+                                            </td>
+                                            <td>[[${teamRole.getUser().getFirstName()}]]</td>
+                                            <td>
+                                                <select class="form-select form-select-sm team_roles_dropdown"
+                                                        onclick="validateSelect(this)"
+                                                        th:field="*{teamRoles[__${status.index}__].role}">
+                                                    <option th:selected="${teamRole.getRole() == 'Manager'}"
+                                                            value="Manager">
+                                                        Manager
+                                                    </option>
+                                                    <option th:selected="${teamRole.getRole() == 'Coach'}"
+                                                            value="Coach">
+                                                        Coach
+                                                    </option>
+                                                    <option th:selected="${teamRole.getRole() == 'Member'}"
+                                                            value="Member">
+                                                        Member
+                                                    </option>
+                                                </select>
+                                            </td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                    <a class="btn btn-primary" id="editBackBtnMembers"
+                                       th:href="@{'viewTeam?id=' + ${id} + '&showAllTeams=0' + '&tab=' + ${tab}}"
+                                       type="button">Back</a>
+                                    <button class="btn btn-primary" onclick="getRole(this)"
+                                            type="button">Save Changes
+                                    </button>
+                                </div>
+                                <div class="position-fixed bottom-0 start-0 p-3 "
+                                     style="z-index: 11">
+                                    <div aria-atomic="true"
+                                         aria-live="assertive"
+                                         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+                                         id="tooManyManagerToast"
+                                         role="alert">
+                                        <div class="d-flex align-items-center justify-content-between p-2">
+                                            <div class="toast-body d-flex align-items-center gap-1">
+                                                <svg class="bi bi-exclamation-diamond-fill"
+                                                     fill="#D9534F"
+                                                     height="2rem" viewBox="0 0 16 16"
+                                                     width="2rem"
+                                                     xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                                </svg>
+                                                <p class="m-0 h5 toast-danger">Only 3 managers can
+                                                    be assigned.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div aria-atomic="true"
+                                         aria-live="assertive"
+                                         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+                                         id="NoEnoughManager"
+                                         role="alert">
+                                        <div class="d-flex align-items-center justify-content-between p-2">
+                                            <div class="toast-body d-flex align-items-center gap-1">
+                                                <svg class="bi bi-exclamation-diamond-fill"
+                                                     fill="#D9534F"
+                                                     height="2rem" viewBox="0 0 16 16"
+                                                     width="2rem"
+                                                     xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                                </svg>
+                                                <p class="m-0 h5 toast-danger">No managers are
+                                                    assigned to the team.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+    <script>
+        (function () {
+            'use strict'
+
+            // Fetch all the forms we want to apply custom Bootstrap validation styles to
+            var forms = document.querySelectorAll('.needs-validation')
+
+            // Loop over them and prevent submission
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!-- used -->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+
+</head>
+<header th:fragments="header">
+    <nav class="navbar navbar-expand-sm bg-body px-2">
+        <a class="navbar-brand fs-2 fw-bold" th:href="@{/profilePage}">ConQuest.</a>
+        <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                class="navbar-toggler" data-bs-target="#navbarNav" data-bs-toggle="collapse"
+                type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <ul class="navbar-nav gap-2 bg-transparent">
+                <li class="nav-item dropdown" id="club-dropdown">
+                    <a aria-expanded="false" aria-haspopup="true"
+                       class="nav-link dropdown-toggle"
+                       data-bs-toggle="dropdown" id="club-dropdown-btn"
+                       role="button" type="button">
+                        Club
+                    </a>
+                    <ul aria-labelledby="team-dropdown-btn" class="dropdown-menu ">
+                        <li>
+                            <a class="dropdown-item" id="createClubBtn"
+                               th:href="@{/createClub}">
+                                Create Club
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" id="viewMyClubsBtn"
+                               th:href="@{/viewTeams?showAllTeams=0}">
+                                View My Clubs
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" id="viewClubsBtn"
+                               th:href="@{/viewTeams}">
+                                View All Clubs
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown" id="team-dropdown">
+                    <a aria-expanded="false" aria-haspopup="true"
+                       class="nav-link dropdown-toggle"
+                       data-bs-toggle="dropdown" id="team-dropdown-btn"
+                       role="button" type="button">
+                        Team
+                    </a>
+                    <ul aria-labelledby="team-dropdown-btn" class="dropdown-menu ">
+                        <li><a class="dropdown-item text-center" th:href="@{/createTeam}">Create
+                            Team</a></li>
+                        <li><a class="dropdown-item text-center"
+                               id="viewMyTeamsBtn" th:href="@{/viewTeams?showAllTeams=0}">View My
+                            Teams</a></li>
+                        <li><a class="dropdown-item text-center" id="viewTeamsBtn"
+                               th:href="@{/viewTeams}">View All Teams</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown w-100">
+                    <a aria-expanded="false" aria-haspopup="true"
+                       class="nav-link dropdown-toggle"
+                       data-bs-toggle="dropdown" id="activity-dropdown-btn"
+                       role="button" type="button">
+                        Activities
+                    </a>
+                    <ul aria-labelledby="activity-dropdown-btn" class="dropdown-menu ">
+                        <li class="nav-item"><a class="dropdown-item text-center"
+                                                id="createActivityButton"
+                                                th:href="@{/createActivity}">Create Activity</a>
+                        </li>
+                        <li class="nav-item"><a class="dropdown-item text-center"
+                                                id="viewActivityButton"
+                                                th:href="@{/viewMyActivities}">My Activities</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown w-100">
+                    <a aria-expanded="false" aria-haspopup="true"
+                       class="nav-link dropdown-toggle"
+                       data-bs-toggle="dropdown" href="#"
+                       id="search-dropdown-btn" role="button">
+                        Search
+                    </a>
+                    <ul aria-labelledby="search-dropdown-btn" class="dropdown-menu w-100">
+                        <li><a class="dropdown-item text-center" id="search-teams-btn"
+                               th:href="@{/viewTeams}">Search Teams</a></li>
+                        <li><a class="dropdown-item text-center" th:href="@{/allUsers}">Search
+                            Profiles</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav gap-2 mt-2 mt-sm-0">
+                <li class="nav-item">
+                    <div class="d-flex h-100 justify-content-sm-center align-items-center gap-2">
+                        <label class="ui-switch">
+                            <input type="checkbox" onchange="setPageTheme()" id="flexSwitchCheckDefault">
+                            <div class="slider">
+                                <div class="circle"></div>
+                            </div>
+                        </label>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a aria-expanded="false" aria-haspopup="true"
+                       class="nav-link dropdown-toggle"
+                       data-bs-toggle="dropdown" href="#"
+                       id="profile-dropdown-btn" role="button">
+                        Profiles
+                    </a>
+                    <ul aria-labelledby="profile-dropdown-btn"
+                        class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item text-center" th:href="@{/profilePage}">User
+                            Profile</a></li>
+                        <li><a class="dropdown-item text-center" th:href="@{/allUsers}">See All
+                            Profiles</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form class="form-inline" method="post" th:action="@{/logout}">
+                                <button class="dropdown-item text-center text-danger" type="submit">
+                                    Logout
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- Join Team Modal -->
+        <div aria-hidden="true" aria-labelledby="joinModalLabel" class="modal fade" id="joinModal"
+             tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form id="userForm" method="post" th:action="@{joinTeam}">
+
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="joinModalLabel">Join Team</h1>
+                            <button aria-label="Close" class="btn-close" data-bs-dismiss="modal"
+                                    type="button"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <input class="form-control" id="current-page"
+                                   th:name="current-page"
+                                   th:value="${#ctx.springRequestContext.requestUri}" type="hidden">
+                            <label class="required" for="invitation-token"> Invitation
+                                Token: </label>
+                            <input class="form-control" data-cy="name" id="invitation-token"
+                                   placeholder="Invitation Token"
+                                   required th:name="invitation-token" type="text">
+                            <div ; id="inviteError" style="color:red"
+                                 th:if="${param.tokenErrorText != null}">[[${param.tokenErrorText}]]
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">
+                                Close
+                            </button>
+                            <button class="btn btn-primary" id="joinTeamSubmitBtnModal"
+                                    type="submit">Join Team
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <script>
+            window.addEventListener("load", (event) => {
+                checkThemeCookie();
+            })
+            let setCurrentPage = false
+            document.onreadystatechange = function () {
+                if (document.getElementById("joinTeamBtn") === null) {
+                } else {
+                    if (!setCurrentPage) {
+                        let queryString = new URLSearchParams(window.location.search);
+                        queryString.delete("validToken")
+                        queryString.delete("tokenErrorText")
+                        queryString.delete("tokenError")
+                        document.getElementById("current-page").value = document.getElementById("current-page").value + "?" + queryString.toString()
+                        setCurrentPage = true;
+                    }
+                    if (document.getElementById("inviteError") !== null && !window.location.href.includes("/viewMyTeams")) {
+
+                        document.getElementById("joinTeamBtn").click()
+                    }
+                }
+
+            }
+        </script>
+    </nav>
+</header>
+</html>

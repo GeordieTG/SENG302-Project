@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:util="java.util">
+<head>
+    <meta charset="UTF-8">
+    <util:import static="com.example.ListUtils.listSplit"/>
+    <title th:text="${team.name}"></title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}">
+    <script th:src="@{/JavaScript/main.js}"></script>
+    <script th:src="@{/JavaScript/clubCreation.js}"></script>
+    <script th:src="@{/JavaScript/UserProfile.js}"></script>
+    <script th:src="@{/JavaScript/roles.js}"></script>
+    <script th:src="@{/JavaScript/TeamProfile.js}"></script>
+    <script defer th:src="@{/JavaScript/calendar.js}"></script>
+    <script th:src="@{/JavaScript/imageHandler.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+    <style>
+
+        #calendar-formation-card .tab-content {
+            display: flex;
+        }
+
+        #calendar-formation-card .tab-content > .tab-pane {
+            display: block; /* undo "display: none;" */
+            visibility: hidden;
+            margin-right: -100%;
+            width: 100%;
+        }
+
+        #calendar-formation-card .tab-content > .active {
+            visibility: visible;
+        }
+
+        .tab-content {
+            height: 100%;
+        }
+
+        .toast-danger {
+            color: #D9534F; /* Indian red */
+        }
+    </style>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let csrfToken = /*[[${_csrf.token}]]*/ '';
+        createGlobal(csrfToken)
+        let events = [[${events}]];
+        let teamEvents = [[${teamEvents}]];
+        /*]]>*/
+
+    </script>
+</head>
+<body class="bg-body-secondary"
+      onload="renderCalendar(events, teamEvents, []), checkIfChanged(), calculateHeight(), changeTab()"
+      style="background-repeat: no-repeat;">
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+
+<div class="m-3" id="column-1">
+    <div class="row">
+
+        <div class="col-12">
+            <!-- Profile Card -->
+            <div class="card d-flex border-0 justify-content-end" id="teamBanner"
+                 style="background-image: url(images/team_banner.jpg);">
+                <div class="card-body bg-body p-2 d-flex position-relative" id="teamInfo"
+                     style="border-bottom-left-radius: var(--bs-border-radius); border-bottom-right-radius: var(--bs-border-radius);">
+                    <span class="position-absolute top-0 end-0" th:if="${managerOrCoach}">
+                        <a class="btn btn-outline-light border-0 p-2 m-2 "
+                           id="editTeamProfileBtn"
+                           th:href="@{'/editTeamProfile?id=' + ${id} + '&tab=' + ${tab}}">
+                            <svg class="bi bi-pencil-square text-body" fill="currentColor" height="16"
+                                 viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                <path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                                      fill-rule="evenodd"/>
+                            </svg>
+                        </a>
+                    </span>
+                    <div class="row m-0 w-100">
+                        <div class="col-4 col-lg-3">
+                            <div class="d-flex  justify-content-end position-relative">
+                                <div class="h-auto d-flex flex-column justify-content-center align-items-center">
+                                    <img alt="image not found"
+                                         class="img-fluid rounded-circle profile-picture teamLogo"
+                                         id="picture-id"
+                                         th:src="@{${team.image}}">
+                                    <div style="margin: -28px"  >
+                                        <!-- Change PFP Button-->
+                                        <div th:if="${managerOrCoach} == true">
+                                        <label class="btn btn-default"
+                                               for="profilePicture"
+                                               id="profilePictureLabelPlus"
+                                               style="display: inline-block" >
+                                            <svg class="bi bi-plus bg-body-secondary text-body border-0 rounded-circle"
+                                                 fill="currentColor"
+                                                 height="40"
+                                                 style="border: 1px solid #ccc; padding: 4px; border-radius: 50%; width: 40px; height: 40px"
+                                                 viewBox="0 0 16 16"
+                                                 width="40"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                            </svg>
+                                        </label>
+                                        <label class="btn btn-default"
+                                               id="profilePictureLabelTick" style="display: none">
+                                            <svg class="bi bi-check-lg bg-body-secondary text-body border-0 rounded-circle"
+                                                 fill="currentColor"
+                                                 height="16"
+                                                 style="border: 1px solid #ccc; padding: 4px; border-radius: 50%; width: 40px; height: 40px"
+                                                 th:onclick="uploadImage([[${team.id}]], 'team')"
+                                                 viewBox="0 0 16 16"
+                                                 width="16"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                                            </svg>
+                                        </label>
+                                        <input accept="image/png, image/jpeg, image/svg, image/gif"
+                                               class="form-control editField"
+                                               hidden
+                                               id="profilePicture"
+                                               onchange="handleUpload(event)" required
+                                               th:name="profilePicture"
+                                               type="file">
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-8 col-lg-9 d-flex">
+                            <div class="d-flex flex-column w-100 justify-content-evenly">
+                                <h1 class="fw-bold text-body">[[${team.name}]]</h1>
+                                <div class="d-flex gap-2 align-items-center"
+                                     id="clubSection"
+                                     th:if="${teamClub}"
+                                     th:onclick="'window.location.href = \'' + @{/viewClub(id=${teamClub.getId()})} + '\''">
+                                    <img alt="Image"
+                                         class="img-fluid rounded-circle formation-player-pictures border border-secondary"
+                                         style="width: 3rem; height: 3rem"
+                                         th:id="${'li' + playerID}"
+                                         th:src="${teamClub.getImage()}"/>
+                                    <span class="text-body" th:text="${teamClub.getName()}"></span>
+                                </div>
+                                <div class="d-flex gap-2 align-items-center"
+                                     id="clubSectionForNoClub"
+                                     th:if="${teamClub == null}">
+                                    <img alt="Image"
+                                         class="img-fluid rounded-circle formation-player-pictures border border-secondary"
+                                         style="width: 3rem; height: 3rem"
+                                         th:id="${'li' + playerID}"
+                                         th:src="${'images/default_club.png'}"/>
+                                    <span class="text-body" th:text="${'No Club'}"></span>
+                                </div>
+
+                                <div class="d-flex text-body gap-3">
+                                    <span th:text="${team.sport}"></span>
+                                    <span>[[${city + ", " + country}]]</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3 gap-3 gap-xl-0">
+        <!-- Calendar and Formations Card -->
+        <div class="col-12 col-xl-8" id="calendarFormationSection">
+            <div class="card">
+                <div class="card-header bg-body">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#tab-calendar">Calendar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#tab-formations"
+                               id="nav-formations">Formations</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body" id="calendar-formation-card">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab-calendar">
+                            <h1 class="mb-1 mt-2" id="currentMonth"
+                                style="width: 30%; margin-left: 10%;"></h1>
+                            <div class="mb-1 d-flex gap-2" style="width: 30%; margin-left: 10%;">
+                                <button class="btn btn-secondary" id="today-btn">
+                                    Today
+                                </button>
+                                <button class="btn btn-secondary" id="prev-month-btn">
+                                    <svg class="bi bi-arrow-left-short" fill="currentColor" height="16"
+                                         viewBox="0 0 16 16"
+                                         width="16" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"
+                                              fill-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                                <button class="btn btn-secondary" id="next-month-btn">
+                                    <svg class="bi bi-arrow-right-short" fill="currentColor" height="16"
+                                         viewBox="0 0 16 16"
+                                         width="16" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+                                              fill-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div id="calendar"
+                                 style="margin-left: 10%; margin-right: 10%; margin-bottom: 2%; height: 600px; border: 1px solid grey"></div>
+                        </div>
+                        <div class="tab-pane fade" id="tab-formations">
+                            <div class="container mx-auto text-center bg-body-secondary py-3 ">
+                                <a class="btn btn-primary align-middle" id="createFormationButton"
+                                   th:href="@{'/createFormation?id=' + ${id}}"
+                                   th:if="${managerOrCoach} == true"
+                                   type="button">
+                                    Create Formation
+                                </a>
+                                <div class="text-center mt-5" th:if="${formationSize} == 0">Team has
+                                    no formations
+                                </div>
+                                <ul class="list-group py-3" id="formation-list-group"
+                                    th:if="${formationSize} != 0">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                                        th:each="formation: ${formations}"
+                                        th:id="'formation-item-'+${formations.indexOf(formation)}">
+                                        <a class="stretched-link"
+                                           style="text-decoration: none; color: black"
+                                           th:href="@{'displayFormation?id='+${id}+'&formation=' + ${formation.getFormation()} + '&field=' + ${formation.getField()}}">
+                                            [[${formation.getFormation()}]] </a>
+                                        <span class="badge bg-primary rounded-pill">[[${formation.getField()}]]</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-4" id="statisticsAndMembersSection">
+            <div class="card h-100">
+                <div class="card-header bg-body">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#tab-statistics">Statistics</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#tab-members"
+                               id="teamMembersBtn">Team
+                                Members</a>
+                        </li>
+                    </ul>
+                </div>
+
+
+                <!--Statistics/Members Side Bar-->
+                <div class="card-body" id="column-2">
+                    <div class="tab-content">
+
+                        <!--Statistics Tab-->
+                        <div class="tab-pane fade show active" id="tab-statistics">
+
+                            <!--Record-->
+                            <div class="d-flex justify-content-center mt-4">
+                                <h1 th:text="${teamWins} + '-' + ${teamDraws} + '-' + ${teamLosses}"></h1>
+                            </div>
+
+                            <div class="d-flex justify-content-center align-items-center gap-2"
+                                 style="width:100%"
+                                 th:if="${lastFiveTrend.size()} != 0">
+                                <h6>Last Five:</h6>
+                                <div class="d-flex justify-content-center gap-2"
+                                     th:each="game: ${lastFiveTrend}">
+                                    <p class="px-2"
+                                       style="border-radius: 20px; width:1.5rem; background:#ef2525; color:#ef2525"
+                                       th:if="${game.outcome.toString().equals('LOSS')}  and ${game.type.equals('Game')}">
+                                        G</p>
+                                    <p class="px-2"
+                                       style="border-radius: 20px; width:1.5rem; background:forestgreen; color:forestgreen"
+                                       th:if="${game.outcome.toString().equals('WON')}  and ${game.type.equals('Game')}">
+                                        G</p>
+                                    <p class="px-2"
+                                       style="border-radius: 20px; width:1.5rem; background:grey; color:grey"
+                                       th:if="${game.outcome.toString().equals('DRAW')} and ${game.type.equals('Game')}">
+                                        G</p>
+                                    <p class="px-2"
+                                       style="border-radius: 20px; width:1.5rem; background:#ef2525; color:white"
+                                       th:if="${game.outcome.toString().equals('LOSS')} and ${game.type.equals('Friendly')}">
+                                        F</p>
+                                    <p class="px-2"
+                                       style="border-radius: 20px; width:1.5rem; background:forestgreen; color:white"
+                                       th:if="${game.outcome.toString().equals('WON')} and ${game.type.equals('Friendly')}">
+                                        F</p>
+                                    <p class="px-2"
+                                       style="border-radius: 20px; width:1.5rem; background:grey; color:white"
+                                       th:if="${game.outcome.toString().equals('DRAW')} and ${game.type.equals('Friendly')}">
+                                        F</p>
+                                    <p class="px-2"
+                                       style="width:1.5rem;"
+                                       th:if="${game.outcome.toString().equals('UNDECIDED')}">
+                                        -</p>
+                                </div>
+                            </div>
+
+                            <sub class="d-flex justify-content-center mb-4">Win - Draw - Loss</sub>
+
+                            <!--Total Games-->
+                            <h6 class="d-flex justify-content-center"
+                                th:text="'Total Games: ' + ${totalGames}"></h6>
+
+                            <!--Top Scorers-->
+                            <h4 class="mt-5">Top Performers</h4>
+                            <div class="d-flex justify-content-center" style="width:100%">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Player</th>
+                                            <th scope="col">Points</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="text-center" th:if="${topScorers.size()} == 0">
+                                            <td th:colspan="2">No Players to Show</td>
+                                        </tr>
+
+                                        <tr th:each="member : ${topScorers}">
+                                            <td th:onclick="'window.location.href = \'' + @{/oneUser(id=${member.getUser().getId()})} + '\''">
+                                                <img
+                                                    alt="image not found"
+                                                    class="me-3 profilePicture"
+                                                    style="width:2em; height:2em"
+                                                    th:src="@{${member.getUser().getProfilePicture()}}">[[${member.getUser().getFirstName()}
+                                                + ' ' + ${member.getUser().getLastName()}]]
+                                            </td>
+                                            <td th:text="${member.getTotalPoints()}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+
+                            <!--Longest Playtime-->
+                            <h4 class="mt-4">Top Playtime (Minutes)</h4>
+                            <div class="d-flex justify-content-center" style="width:100%">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Player</th>
+                                            <th scope="col">Overall</th>
+                                            <th scope="col">Average</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="member : ${topPlayTime}">
+                                            <td><img
+                                                    alt="image not found"
+                                                    class="me-3 profilePicture"
+                                                    style="width:2em; height:2em"
+                                                    th:src="@{${member.getUser().getProfilePicture()}}">
+                                                [[${member.getUser().getFirstName()} + ' ' +
+                                                ${member.getUser().getLastName()}]]
+                                            </td>
+                                            <td>[[${member.getTotalTime()}]]</td>
+                                            <td th:if="${member.getTotalGames() == 0}"
+                                                th:text="0"></td>
+                                            <td th:if="${member.getTotalGames() != 0}"
+                                                th:text="${(member.getTotalTime() / member.getTotalGames())}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!--Recent Games-->
+                            <div class="mt-4 d-flex justify-content-between">
+                                <h4>Recent Games</h4>
+                                <div>
+                                    <form id="teamForm" th:action="@{/viewAllTeamsGames}"><input
+                                            name="teamId" th:value="${team.id}" type="hidden">
+                                        <a class="d-inline-flex align-items-center gap-2"
+                                           onclick="document.getElementById('teamForm').submit();"
+                                           style="color:#5555fa; cursor:pointer">
+                                            <span>See All</span>
+                                            <svg class="bi bi-arrow-right ml-1" fill="currentColor"
+                                                 height="12" viewBox="0 0 16 16"
+                                                 width="12" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"
+                                                      fill-rule="evenodd"/>
+                                            </svg>
+                                        </a>
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-center" style="width:100%">
+
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Score</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr class="text-center" th:if="${recentGames.size()} == 0">
+                                        <td th:colspan="3">No Games to Show</td>
+                                    </tr>
+                                        <tr th:each="game: ${recentGames}" th:id="recentGame"
+                                            th:onclick="|window.location.href='| + @{/viewActivity(id=${game.getId})} + |'|">
+                                            <td th:text="${game.type}"></td>
+                                            <td th:text="${game.startTime.split('T')[0]}"></td>
+                                            <td th:if="${game.homeScore == null}">No Score
+                                                Recorded
+                                            </td>
+                                            <td th:if="${game.homeScore != null}"
+                                                th:text="${game.homeScore} + '-' + ${game.oppositionScore}"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                        <!--Members Tab-->
+                        <div class="tab-pane fade overflow-auto" id="tab-members">
+
+                            <!--Invitation Functionality-->
+                            <div class="col-3 w-100 col-xl-3 col-xxl-4" th:if="${isManager}">
+                                <div class="d-flex w-100 justify-content-center p-3">
+                                    <form class="w-100" id="inviteTokenForm" method="post"
+                                          th:action="@{generate}">
+                                        <div class="d-flex w-100 justify-content-around flex-column">
+                                            <div class="form-group">
+                                                <label class="w-100" for="invitation-token-section">Invitation
+                                                    Token:</label>
+                                                <div class="d-inline-flex gap-2">
+                                                    <input class="form-control"
+                                                           data-testid="unique_token"
+                                                           id="invitation-token-section"
+                                                           placeholder="Click the generate button below"
+                                                           readonly
+                                                           th:name="invitation-token-section"
+                                                           th:value="${inviteToken}"
+                                                           type="password">
+                                                    <input class="form-control" hidden
+                                                           id="invite-token-hidden"
+                                                           readonly
+                                                           th:name="invite-token-hidden"
+                                                           th:value="${inviteTokenHidden}"
+                                                           type="password">
+                                                    <button class="btn btn-secondary"
+                                                            id="ShowToken"
+                                                            onclick="tokenShow()"
+                                                            style="height:38px"
+                                                            type="button">Show
+                                                    </button>
+                                                    <button class="btn btn-primary"
+                                                            type="submit">Generate
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <p class="text-danger"
+                                               th:if="${param.tokenError != null}">
+                                                [[${param.tokenError}]]
+                                            </p>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!--Members Table-->
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th id="rolePicture" scope="col">Profile Picture</th>
+                                    <th id="memberName" scope="col">Member Name</th>
+                                    <th id="Role" scope="col">Role</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="teamMemberAndRoleList"
+                                        th:each="member,isMember : ${teamMemberAndRoleList}">
+                                        <td th:onclick="'window.location.href = \'' + @{/oneUser(id=${member.getUser().getId()})} + '\''">
+                                            <img alt="image not found"
+                                                 class="profilePicture "
+                                                 style="width:2em; height:2em"
+                                                 th:src="@{${member.getUser().getProfilePicture()}}"
+                                                 >
+                                        </td>
+                                        <td th:id="'team-member_'+${isMember.index}" th:onclick="'window.location.href = \'' + @{/oneUser(id=${member.getUser().getId()})} + '\''">
+                                            [[${member.getUser().getFirstName()}]]
+                                        </td>
+                                        <td th:id="'member_role_'+${isMember.index}">
+                                            [[${member.getRole()}]]
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<div class="position-fixed bottom-0 start-0 p-3 " style="z-index: 11">
+    <input hidden id="rolesHaveChanged" th:value="${rolesChanged}" type="text"/>
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast align-items-center bg-success bg-opacity-25 border-start border-success border-5 border-0"
+         id="rolesHaveChangedToast" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg class="bi bi-exclamation-diamond-fill" fill="#198754" height="16"
+                     viewBox="0 0 16 16"
+                     width="16" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <p class="m-0 h5 text-success">Changes saved</p>
+            </div>
+        </div>
+    </div>
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+         id="imageTooLarge" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg class="bi bi-exclamation-diamond-fill" fill="#D9534F" height="2rem"
+                     viewBox="0 0 16 16"
+                     width="2rem" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <p class="m-0 h5 toast-danger">Image is too large</p>
+            </div>
+        </div>
+    </div>
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+         id="imageIsWrongType" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg class="bi bi-exclamation-diamond-fill" fill="#D9534F" height="2rem"
+                     viewBox="0 0 16 16"
+                     width="2rem" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <p class="m-0 h5 toast-danger">Image must be either a PNG, JPG or a SVG</p>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+<script>
+    document.onreadystatechange = function () {
+        let queryString = new URLSearchParams(window.location.search);
+        if (queryString.has("generatedToken")) {
+            var profileTab = document.getElementById("nav-profile-tab");
+            profileTab.classList.remove("active");
+            var invitesTab = document.getElementById("nav-invites-tab");
+            invitesTab.classList.add("active");
+            var navProfile = document.getElementById("nav-profile");
+            navProfile.classList.remove("active");
+            navProfile.classList.remove("show");
+            var navProfile = document.getElementById("nav-invites");
+            navProfile.classList.add("active");
+            navProfile.classList.add("show");
+        }
+    }
+</script>
+</html>
+

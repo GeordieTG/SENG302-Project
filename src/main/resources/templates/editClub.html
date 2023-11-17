@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/club.css}">
+    <link rel="stylesheet" th:href="@{/css/required.css}">
+
+    <script th:src="@{/JavaScript/clubCreation.js}"></script>
+    <script th:src="@{/JavaScript/imageHandler.js}"></script>
+    <script th:src="@{/JavaScript/locationAPI.js}"></script>
+    <script th:src="@{/JavaScript/clubTeamSelection.js}"></script>
+    <title>Edit Club</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let csrfToken = /*[[${_csrf.token}]]*/ '';
+        createGlobal(csrfToken)
+        let oldImagePulled = /*[[${club.getImage()}]]*/ '';
+        setGlobalImage(oldImagePulled)
+        let clubSport = /*[[${club.getSport()}]]*/ '';
+        setClubSport(clubSport)
+        /*]]>*/
+    </script>
+
+</head>
+<body class="bg-body-secondary" onload="renderSelectedTeams(getSelectedTeams()); checkSelectedDivEmpty();
+        setClubSport('Onload')">
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<div class="container-fluid w-50 d-flex justify-content-center mt-5 overflow-hidden">
+    <div class="card">
+        <div class="card-body px-4 py-4">
+            <div class="d-flex flex-column justify-content-evenly align-items-center gap-3">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <h4>Edit Club</h4>
+                        <p style="color: grey; text-align: left">
+                            Register your club on ConQuest - Stronger Together
+                        </p>
+                        <div class="mb-2 flex w-full flex-col items-center justify-center">
+                            <div class="d-flex justify-content-center my-3"
+                                 style="position: relative;">
+                                <img alt="image not found"
+                                     class="img-fluid rounded-circle profile-picture"
+                                     id="picture-id"
+                                     style="width: 8rem; height:
+                                     8rem; object-fit: cover" th:src="${club.getImage()}">
+                                <div style="position: absolute; top: 70%;">
+                                    <!-- Change PFP Button-->
+                                    <label class="btn btn-default"
+                                           for="profilePicture"
+                                           id="profilePictureLabel">
+                                        <svg class="bi bi-plus bg-white rounded-circle"
+                                             fill="currentColor"
+                                             height="40"
+                                             style="border: 1px solid #ccc; padding: 4px; border-radius: 50%;"
+                                             viewBox="0 0 16 16"
+                                             width="40"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                        </svg>
+                                    </label>
+                                    <input accept="image/png, image/jpeg, image/svg, image/gif"
+                                           class="form-control editField"
+                                           hidden
+                                           id="profilePicture"
+                                           onchange="handleUpload(event)" required
+                                           th:name="profilePicture"
+                                           type="file">
+                                </div>
+                            </div>
+                        </div>
+
+                        <label class="required" for="name">Name</label>
+                        <input aria-describedby="clubNameHelp" autofocus
+                               class="form-control"
+                               id="name"
+                               placeholder="Club name"
+                               th:value="${club.name}" type="text">
+                        <small class="text-danger form-text" id="name_error"></small>
+
+                        <div id="sportSelect">
+                            <label class="mt-2 required" for="sport">Sport</label>
+                            <select class="form-select" id="sport"
+                                    onclick="setClubSport(this.value)"
+                                    type="text">
+                                <option th:value="-1">Select Sport</option>
+                                <div th:each="sport : ${sports}">
+                                    <option
+                                            th:id="${sport}"
+                                            th:selected="${club.sport == sport}"
+                                            th:text="${sport.
+                                            toString()[0] + sport.toString().substring(1).toLowerCase()}"
+                                            th:value="${sport}">
+                                    </option>
+                                </div>
+                            </select>
+                        </div>
+                        <div hidden id="sportDisplayDiv">
+                            <label>Sport</label>
+
+                            <input aria-describedby="clubNameHelp" autofocus class="form-control"
+                                   disabled
+                                   id="sportDisplay"
+                                   placeholder="Club name"
+                                   th:value="${club.sport}"
+                                   title="You cannot change the sports when a club has teams"
+                                   type="text">
+                        </div>
+                        <small class="text-danger form-text" id="sport_error"></small>
+
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="col-12 col-form-label" for="address1">
+                            Address
+                        </label>
+                        <input class="form-control"
+                               id="address1"
+                               list="address_list"
+                               oninput="onInput()"
+                               onkeyup="timerStartOnKeyUpForAddress()"
+                               placeholder="Street address"
+                               th:value="${club.getLocation().getLine1()}"
+                               type="text">
+
+                        <datalist id="address_list"></datalist>
+                        <label class="col-form-label"></label>
+                        <input class="form-control"
+                               id="address2"
+                               placeholder="Street address continued"
+                               th:value="${club.getLocation().getLine2()}"
+                               type="text">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="col-form-label" for="suburb">
+                            Suburb
+                        </label>
+                        <input class="form-control"
+                               id="suburb"
+                               placeholder="Suburb"
+                               th:value="${club.getLocation().getSuburb()}"
+                               type="text">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="col-form-label required" for="city">
+                            City
+                        </label>
+                        <input aria-describedby="cityHelp"
+                               class="form-control"
+                               id="city"
+                               list="city_list"
+                               placeholder="City"
+                               th:value="${club.getLocation().city}"
+                               type="text">
+                        <small class="text-danger form-text" id="city_error"></small>
+                        <!--       oninput="checkCity()"-->
+                        <!--       onkeyup="timerStartOnKeyUpForCity()"-->
+                        <datalist id="city_list"></datalist>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="col-form-label" for="postcode">
+                            Postcode
+                        </label>
+                        <input class="form-control"
+                               id="postcode"
+                               placeholder="Postcode"
+                               th:value="${club.getLocation().getPostcode()}"
+                               type="text">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="col-form-label required" for="country">
+                            Country
+                        </label>
+                        <input aria-describedby="countryHelp"
+                               class="form-control"
+                               id="country"
+                               list="country_list"
+                               placeholder="Country"
+                               th:value="${club.getLocation().country}"
+                               type="text">
+                        <small class="text-danger form-text" id="country_error"></small>
+                        <!--       oninput="checkCountry()"-->
+                        <!--       onkeyup="timeStartOnKeyUpForCountry()"-->
+                        <datalist id="country_list"></datalist>
+                    </div>
+
+                    <!-- team select -->
+                    <div>
+                        <div id="teamSelectDisplay">
+                            <div id="selectedTeams"></div>
+                            <div aria-controls="teamCheckboxes" aria-expanded="false"
+                                 class="form-select"
+                                 data-bs-toggle="collapse" href="#teamCheckboxes"
+                                 id="dropdownController">
+                                <span id="defaultMessage">Select teams</span>
+                            </div>
+                        </div>
+
+                        <!--   Area for managed/coached teams -->
+                        <div class="container py-2 collapse" id="teamCheckboxes">
+                            <div>
+                                <input aria-describedby="inputGroup-sizing-sm" aria-label="Small"
+                                       class="form-control"
+                                       id="teamSearchInput"
+                                       oninput="filterTeams(this.value)"
+                                       placeholder="Search teams by name"
+                                       type="text">
+
+                            </div>
+
+                            <div class="row row-cols-2 py-2 overflow-auto" id="ownedTeamsOptions">
+                                <div class="mt-3"
+                                     th:each="team, indexStat :${ownerTeams}"
+                                     th:id="${'team-' + indexStat.index}"
+                                     th:if="${ownerTeams.size() >= 1}">
+                                    <input class="btn-check" onchange="
+                                           renderSelectedTeams(getSelectedTeams());
+                                           checkSelectedDivEmpty()"
+                                           th:checked="${club.getTeams().contains(team)}"
+                                           th:id="${'team-' + indexStat.index + '-checkbox'}"
+                                           th:value="${team.getBriefString()}"
+                                           type="checkbox">
+                                    <label class="w-100 d-flex align-items-center justify-content-center h-100 btn btn-outline-primary"
+                                           th:for="${'team-' + indexStat.index + '-checkbox'}">[[${team.name}]]</label>
+                                    <input hidden
+                                           th:id="${'team-' + indexStat.index + '-sport'}"
+                                           th:value="${team.sport}">
+                                </div>
+                            </div>
+                            <small class="text-danger form-text" id="teams_error"></small>
+
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="submit_button"
+                            onclick="editClub(this.value)"
+                            role="button" th:value="${club.getId()}" type="submit">
+                        Submit
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

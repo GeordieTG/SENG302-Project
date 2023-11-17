@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>View & Search Users</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/responses.css}">
+    <link rel="stylesheet" th:href="@{/css/backButtons.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <script th:src="@{/JavaScript/allUsers.js}"></script>
+</head>
+<body class="bg-body-secondary" onload="setCheckboxes()">
+<header th:replace="~{fragments/header.html :: header}"></header>
+<div>
+    <div>
+        <div class="searchDiv">
+            <form class="searchForm" method="post" th:action="@{/allUsersNoAuth}">
+                <a class="resetBtn" th:href="@{/allUsersNoAuth}">Reset</a>
+                <input autofocus class="form-control" data-cy="searchName"
+                       id="searchName"
+                       oninput="setCustomValidity('')"
+                       oninvalid="this.setCustomValidity('Please Enter at least 3 characters to search.')"
+                       pattern="(.){3,}$"
+                       placeholder="Search Users..." required
+                       th:name="searchName"
+                       th:value="*{searchName}"
+                       type="text">
+                <button class="searchBtn" type="submit">Search Users</button>
+                <div class="known-sports-container">
+                    <button class="known-sports-dropdown-btn" onclick="changeKnownSportView()"
+                            type="button">Filter
+                    </button>
+                    <div class="known-sports-dropdown">
+                        <ul class="sport-interests-list" id="knownSports"
+                            onmouseleave="closeDropdown()">
+                            <li th:each="option : ${options}">
+                                <div class="sport-children">
+                                    <input class="knownSports" onchange="changeFilter(this)"
+                                           th:id="${option.name}" th:value="${option.name}"
+                                           type="checkbox"/>
+                                    <label th:for="${option.name}" th:text="${option.name}"></label>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+            <form id="filterForm" method="post" th:action="@{/filter}">
+                <input data-cy="hiddenFilterQuery" id="hiddenFilterQuery" style="display:none;"
+                       th:name="hiddenFilterQuery"
+                       th:value="${searchQuery}" type="text"/>
+            </form>
+        </div>
+        <br>
+        <table id="styled-table">
+            <tr>
+                <th>Profile Picture</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+            </tr>
+            <tbody>
+            <tr th:if="${responses.empty}">
+                <td colspan="3"> No users match that name</td>
+            </tr>
+            <tr th:each="response : ${responses}">
+                <td>
+                    <a th:href="@{'/oneUser/' + ${response.id}}">
+                        <div>
+                            <img class="profilePicture" th:src="@{${response.profilePicture}}">
+                        </div>
+                    </a>
+                </td>
+                <td>
+                    <a class="info" th:href="@{'/oneUser/' + ${response.id}}">
+                        <div th:text="${response.firstName}"></div>
+                    </a>
+                </td>
+                <td>
+                    <a class="info" th:href="@{'/oneUser/' + ${response.id}}">
+                        <div th:text="${response.lastName}"></div>
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <footer class="pagination" style="font-size: large">
+        Total Items [[${totalItems}]]&nbsp; - &nbsp;
+        <span th:each="i: ${#numbers.sequence(1, totalPages)}" th:if="${totalPages} != 0">
+            <a th:href="@{'/allUsers/' + ${i}}" th:if="${i}!=0 and !${filter} and !${search}">[[${i}]]</a>
+            <a th:href="@{'/filter/' +  ${searchQuery} + '/'+ ${i}}"
+               th:if="${i}!=0 and ${filter} and !${search}">[[${i}]]</a>
+            <a th:href="@{'/search/' + ${searchName} + '/' + ${i}}"
+               th:if="${i}!=0 and ${search} and !${filter}">[[${i}]]</a>
+    </span>
+    </footer>
+    <div class="response">
+        <a class="redirectBTN" th:href="@{demo}">Back to home</a>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

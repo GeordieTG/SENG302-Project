@@ -1,0 +1,63 @@
+.profilePicture {
+    display: inline-block;
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    background-position: center center;
+    object-fit: cover;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 15px;
+}
+
+.pagination a {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #eaeaea;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.pagination a.prev {
+    margin-right: 5px;
+}
+
+.pagination a.next {
+    margin-left: 5px;
+}
+
+.pagination a:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+.pagination a.active {
+    background-color: #333;
+    color: #fff;
+}
+
+.pagination a:first-of-type {
+    margin-right: 0;
+}
+
+.pagination a:last-of-type {
+    margin-left: 0;
+}
+
+.pagination a:not(:first-of-type):not(:last-of-type) {
+    margin: 0 5px;
+}
+
+.pagination .page-number {
+    cursor: pointer;
+}
+
+.pagination .page-number.active:hover {
+    background-color: #333;
+    color: #fff;
+}

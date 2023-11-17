@@ -1,0 +1,46 @@
+html::-webkit-scrollbar {
+    display: none;
+}
+
+[data-bs-theme=dark] .bg-body-4 {
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--bs-black-rgb),var(--bs-bg-opacity))!important;
+}
+
+[data-bs-theme=light] .bg-body-4 {
+    --bs-bg-opacity: 1;
+    background-color: rgba(var(--bs-body-bg-rgb),var(--bs-bg-opacity))!important;
+}
+
+[data-bs-theme=light] .btn-outline-secondary  {
+    --bs-btn-hover-bg: var(--bs-gray-500);
+    --bs-btn-active-bg: var(--bs-gray-500);
+    --bs-btn-border-color: var(--bs-gray-400);
+}
+[data-bs-theme=light] .btn-secondary  {
+    --bs-btn-bg: var(--bs-gray-500);
+    --bs-btn-border-color: var(--bs-gray-400);
+    --bs-btn-hover-bg: var(--bs-secondary);
+    --bs-btn-hover-border-color: var(--bs-secondary);
+}
+
+[data-bs-theme=light] .btn-primary  {
+    --bs-btn-bg: var(--bs-primary-border-subtle);
+    --bs-btn-border-color: var(--bs-primary-border-subtle);
+    --bs-btn-hover-bg: var(--bs-primary);
+    --bs-btn-hover-border-color: var(--bs-primary);
+}
+option::-webkit-scrollbar {
+    display: none;
+}
+
+select::-webkit-scrollbar {
+    display: none;
+}
+
+.bg-background {
+    --bs-gradient: linear-gradient(0deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
+    background-image: var(--bs-gradient);
+    height: 100vh;
+
+}

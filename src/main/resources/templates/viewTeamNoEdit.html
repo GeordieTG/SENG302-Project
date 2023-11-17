@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:util="java.util">
+<head>
+    <meta charset="UTF-8">
+    <util:import static="com.example.ListUtils.listSplit"/>
+    <title th:text="${team.name}"></title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}">
+    <script th:src="@{/JavaScript/main.js}"></script>
+    <script th:src="@{/JavaScript/UserProfile.js}"></script>
+    <script th:src="@{/JavaScript/roles.js}"></script>
+    <script th:src="@{/JavaScript/TeamProfile.js}"></script>
+    <script defer th:src="@{/JavaScript/calendar.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+    <style>
+        .team-members-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .team-members-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .team-members-container::-webkit-scrollbar-thumb {
+            background: #888;
+        }
+
+        .team-members-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        #calendar-formation-card .tab-content {
+            display: flex;
+        }
+
+        #calendar-formation-card .tab-content > .tab-pane {
+            display: block; /* undo "display: none;" */
+            visibility: hidden;
+            margin-right: -100%;
+            width: 100%;
+        }
+
+        #calendar-formation-card .tab-content > .active {
+            visibility: visible;
+        }
+
+        .tab-content {
+            height: 100%;
+        }
+
+        .toast-danger {
+            color: #D9534F; /* Indian red */
+        }
+    </style>
+    <script>
+        function changeButtonColor(index) {
+            var buttons = document.getElementsByClassName('btn btn-secondary');
+            for (var i = 0; i < buttons.length; i++) {
+                if (buttons[i].id === 'button_' + (index + 1)) {
+                    buttons[i].c
+                    buttons[i].style.backgroundColor = '#333';
+                    buttons[i].style.color = '#fff';
+                } else {
+                    buttons[i].style.backgroundColor = '#fff';
+                    buttons[i].style.color = '#333';
+                }
+            }
+        }
+    </script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        function changeDisplay() {
+            let tab = [[${tab}]]
+            switchNormalTab(tab)
+        }
+
+
+        let events = [];
+        let teamEvents = [[${teamEvents}]];
+        /*]]>*/
+    </script>
+</head>
+<body class="bg-body-secondary"
+      onload="renderCalendar(events, teamEvents, []), checkIfChanged(), calculateHeight(), changeTab()"
+      style="background-repeat: no-repeat;">
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<div class="container">
+    <div class="row justify-content-center my-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#nav-profile">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab"
+                               href="#nav-location">Location</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#nav-member"
+                               id="nav-member-tab">Team Members</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="nav-profile">
+                            <div class="text-center">
+                                <h3 class="card-title">[[${team.name}]]'s profile</h3>
+                            </div>
+                            <div class="d-flex justify-content-center my-3">
+                                <img alt="image not found"
+                                     class="img-fluid rounded-circle profile-picture"
+                                     style="width: 200px; height: 200px" th:src="@{${team.image}}">
+                            </div>
+
+                            <div class="user-details">
+                                <svg class="bi bi-dribbble" fill="currentColor" height="16"
+                                     viewBox="0 0 16 16" width="16"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 0C3.584 0 0 3.584 0 8s3.584 8 8 8c4.408 0 8-3.584 8-8s-3.592-8-8-8zm5.284 3.688a6.802 6.802 0 0 1 1.545 4.251c-.226-.043-2.482-.503-4.755-.217-.052-.112-.096-.234-.148-.355-.139-.33-.295-.668-.451-.99 2.516-1.023 3.662-2.498 3.81-2.69zM8 1.18c1.735 0 3.323.65 4.53 1.718-.122.174-1.155 1.553-3.584 2.464-1.12-2.056-2.36-3.74-2.551-4A6.95 6.95 0 0 1 8 1.18zm-2.907.642A43.123 43.123 0 0 1 7.627 5.77c-3.193.85-6.013.833-6.317.833a6.865 6.865 0 0 1 3.783-4.78zM1.163 8.01V7.8c.295.01 3.61.053 7.02-.971.199.381.381.772.555 1.162l-.27.078c-3.522 1.137-5.396 4.243-5.553 4.504a6.817 6.817 0 0 1-1.752-4.564zM8 14.837a6.785 6.785 0 0 1-4.19-1.44c.12-.252 1.509-2.924 5.361-4.269.018-.009.026-.009.044-.017a28.246 28.246 0 0 1 1.457 5.18A6.722 6.722 0 0 1 8 14.837zm3.81-1.171c-.07-.417-.435-2.412-1.328-4.868 2.143-.338 4.017.217 4.251.295a6.774 6.774 0 0 1-2.924 4.573z"
+                                          fill-rule="evenodd"/>
+                                </svg>
+                                <div class="label-and-description">
+                                    <span class="description">Sport</span>
+                                    <span th:text="${team.sport}"></span>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="tab-pane fade" id="nav-location"
+                             th:with="address = ${location_line1} != '' ? (${location_line1} + (${location_line2} != '' ? ', ' + ${location_line2} : '')) : ${location_line2}">
+                            <div class="text-center">
+                                <h3 class="card-title">[[${team.name}]]'s Location</h3>
+                            </div>
+                            <div class="user-details" th:if="${address != null and address != ''}">
+                                <svg class="bi bi-house" fill="currentColor" height="20"
+                                     viewBox="0 0 16 16" width="20"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5ZM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5 5 5Z"/>
+                                </svg>
+                                <div class="label-and-description">
+                                    <span class="description">Address</span>
+                                    <span th:text="${address}"></span>
+                                </div>
+                            </div>
+
+                            <div class="user-details"
+                                 th:if="${location_suburb != null and location_suburb != ''}">
+                                <svg class="bi bi-shop" fill="currentColor" height="16"
+                                     viewBox="0 0 16 16" width="16"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2.97 1.35A1 1 0 0 1 3.73 1h8.54a1 1 0 0 1 .76.35l2.609 3.044A1.5 1.5 0 0 1 16 5.37v.255a2.375 2.375 0 0 1-4.25 1.458A2.371 2.371 0 0 1 9.875 8 2.37 2.37 0 0 1 8 7.083 2.37 2.37 0 0 1 6.125 8a2.37 2.37 0 0 1-1.875-.917A2.375 2.375 0 0 1 0 5.625V5.37a1.5 1.5 0 0 1 .361-.976l2.61-3.045zm1.78 4.275a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0 1.375 1.375 0 1 0 2.75 0V5.37a.5.5 0 0 0-.12-.325L12.27 2H3.73L1.12 5.045A.5.5 0 0 0 1 5.37v.255a1.375 1.375 0 0 0 2.75 0 .5.5 0 0 1 1 0zM1.5 8.5A.5.5 0 0 1 2 9v6h1v-5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v5h6V9a.5.5 0 0 1 1 0v6h.5a.5.5 0 0 1 0 1H.5a.5.5 0 0 1 0-1H1V9a.5.5 0 0 1 .5-.5zM4 15h3v-5H4v5zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3zm3 0h-2v3h2v-3z"/>
+                                </svg>
+                                <div class="label-and-description">
+                                    <span class="description">Suburb</span>
+                                    <span th:text="${location_suburb}"></span>
+                                </div>
+                            </div>
+
+                            <div class="user-details">
+                                <svg class="bi bi-buildings" fill="currentColor" height="20"
+                                     viewBox="0 0 16 16" width="20"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14.763.075A.5.5 0 0 1 15 .5v15a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5V14h-1v1.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V10a.5.5 0 0 1 .342-.474L6 7.64V4.5a.5.5 0 0 1 .276-.447l8-4a.5.5 0 0 1 .487.022ZM6 8.694 1 10.36V15h5V8.694ZM7 15h2v-1.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5V15h2V1.309l-7 3.5V15Z"/>
+                                    <path d="M2 11h1v1H2v-1Zm2 0h1v1H4v-1Zm-2 2h1v1H2v-1Zm2 0h1v1H4v-1Zm4-4h1v1H8V9Zm2 0h1v1h-1V9Zm-2 2h1v1H8v-1Zm2 0h1v1h-1v-1Zm2-2h1v1h-1V9Zm0 2h1v1h-1v-1ZM8 7h1v1H8V7Zm2 0h1v1h-1V7Zm2 0h1v1h-1V7ZM8 5h1v1H8V5Zm2 0h1v1h-1V5Zm2 0h1v1h-1V5Zm0-2h1v1h-1V3Z"/>
+                                </svg>
+                                <div class="label-and-description">
+                                    <span class="description">City</span>
+                                    <span th:text="${location_city}"></span>
+                                </div>
+                            </div>
+
+                            <div class="user-details" th:if="${location_postcode}">
+                                <svg class="bi bi-mailbox" fill="currentColor" height="20"
+                                     viewBox="0 0 16 16" width="20"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M4 4a3 3 0 0 0-3 3v6h6V7a3 3 0 0 0-3-3zm0-1h8a4 4 0 0 1 4 4v6a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V7a4 4 0 0 1 4-4zm2.646 1A3.99 3.99 0 0 1 8 7v6h7V7a3 3 0 0 0-3-3H6.646z"/>
+                                    <path d="M11.793 8.5H9v-1h5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.354-.146l-.853-.854zM5 7c0 .552-.448 0-1 0s-1 .552-1 0a1 1 0 0 1 2 0z"/>
+                                </svg>
+                                <div class="label-and-description">
+                                    <span class="description">Postcode</span>
+                                    <span th:text="${location_postcode}"></span>
+                                </div>
+                            </div>
+
+                            <div class="user-details">
+                                <svg class="bi bi-globe-americas" fill="currentColor" height="20"
+                                     viewBox="0 0 16 16" width="20"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0ZM2.04 4.326c.325 1.329 2.532 2.54 3.717 3.19.48.263.793.434.743.484-.08.08-.162.158-.242.234-.416.396-.787.749-.758 1.266.035.634.618.824 1.214 1.017.577.188 1.168.38 1.286.983.082.417-.075.988-.22 1.52-.215.782-.406 1.48.22 1.48 1.5-.5 3.798-3.186 4-5 .138-1.243-2-2-3.5-2.5-.478-.16-.755.081-.99.284-.172.15-.322.279-.51.216-.445-.148-2.5-2-1.5-2.5.78-.39.952-.171 1.227.182.078.099.163.208.273.318.609.304.662-.132.723-.633.039-.322.081-.671.277-.867.434-.434 1.265-.791 2.028-1.12.712-.306 1.365-.587 1.579-.88A7 7 0 1 1 2.04 4.327Z"/>
+                                </svg>
+                                <div class="label-and-description">
+                                    <span class="description">Country</span>
+                                    <span th:text="${location_country}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="nav-member">
+                            <div class="text-center">
+                                <h3 class="card-title">[[${team.name}]]'s Team Member</h3>
+                            </div>
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Profile picture</th>
+                                    <th scope="col">Member Name</th>
+                                    <th scope="col">Role</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                <div th:each="member,index : ${teamMemberAndRoleList}">
+                                    <tr>
+                                        <td>
+                                            <img alt="image not found"
+                                                 class="profilePicture "
+                                                 style="width:2em; height:2em"
+                                                 th:src="@{${member.getUser().getProfilePicture()}}">
+                                        </td>
+                                        <td>[[${member.getUser().getFirstName()}]]</td>
+                                        <td>[[${member.getRole()}]]</td>
+                                    </tr>
+                                </div>
+                                </tbody>
+                            </table>
+                        </div>
+                        <form enctype="multipart/form-data" id="teamForm" method="post"
+                              th:action="@{leaveTeam}">
+                            <div class="d-flex justify-content-between my-3">
+                                <button class="btn btn-primary" onclick="history.back()"
+                                        type="button">Go back
+                                </button>
+                                <input class="form-control" id="id" placeholder="None" th:name="id"
+                                       th:value="${team.id}" type="hidden">
+                                <div>
+                                    <button class="btn btn-primary" id="leaveBtn" th:if="${inTeam}"
+                                            th:text="Leave" type="submit"></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>
+

@@ -1,0 +1,25 @@
+a {
+    text-decoration: none;
+    color: black;
+}
+
+a:hover {
+    color: black;
+}
+
+.fc-event {
+    cursor: pointer;
+}
+
+.fc-more-popover {
+    overflow-y: scroll;
+    max-height: 25%;
+}
+
+.fc-daygrid-day {
+    height: 0;
+}
+
+.fc .fc-daygrid-day-frame {
+    min-height: 0;
+}

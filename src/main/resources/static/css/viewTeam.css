@@ -1,0 +1,47 @@
+.sport-interests-list {
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    height: 6em;
+    width: 25%;
+    overflow: hidden;
+    overflow-y: scroll;
+    gap: 1em;
+}
+
+.sport-children {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+}
+
+.sport-children label {
+    margin-bottom: 0;
+}
+
+span {
+    margin: 5px;
+}
+
+#knownSports {
+    display: none;
+}
+
+.known-sports-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.known-sports-dropdown {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    width: 50%;
+    align-items: center;
+}
+
+.known-sports-dropdown-btn {
+    width: 25%;
+}

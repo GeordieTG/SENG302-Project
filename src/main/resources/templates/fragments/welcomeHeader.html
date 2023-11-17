@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<header th:fragment="header">
+    <nav class="navbar navbar-expand-md bg-body justify-content-between mb-4 px-2">
+            <a class="navbar-brand fs-2 fw-bold zoom-effect" th:href="@{/}">ConQuest.</a>
+            <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+                    class="navbar-toggler" data-bs-target="#navbarNav" data-bs-toggle="collapse"
+                    type="button">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        <div class="d-flex justify-content-center align-items-center gap-2">
+            <label class="ui-switch">
+                <input type="checkbox" onchange="setPageTheme()" id="flexSwitchCheckDefault">
+                <div class="slider">
+                    <div class="circle"></div>
+                </div>
+            </label>
+        </div>
+        <script>
+            window.addEventListener("load", (event) => {
+                checkThemeCookie();
+            })
+        </script>
+    </nav>
+</header>
+</body>
+</html>

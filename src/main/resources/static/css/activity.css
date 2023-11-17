@@ -1,0 +1,50 @@
+.description {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.label-and-description {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.activity-details {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 0.25rem;
+    padding-top: 0.5rem;
+}
+
+.factCard {
+    margin: 10px;
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 5px;
+    max-width: 30%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.disable {
+    pointer-events: none;
+    cursor: default;
+    opacity: .65;
+}
+
+.clickableCard:hover {
+    cursor: pointer;
+    opacity: .75;
+}
+/* Style the card when the input is checked */
+.highlighted {
+    background-color: #FFB380; /* Change this to your desired background color */
+}
+[data-bs-theme=dark] .highlighted  {
+    background-color: #FF8C00;
+}

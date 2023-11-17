@@ -1,0 +1,191 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.2'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'jacoco'
+	id 'org.sonarqube' version '4.0.0.2929'
+	id 'checkstyle'
+}
+
+group = 'nz.ac.canterbury.seng302.team400'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'com.h2database:h2'
+	implementation 'org.javatuples:javatuples:1.2'
+
+	implementation "org.springframework.boot:spring-boot-starter-security"
+	implementation 'org.springframework.security:spring-security-test'
+	implementation "org.springframework.boot:spring-boot-starter-mail"
+
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation "io.cucumber:cucumber-spring:7.5.0"
+	testImplementation "io.cucumber:cucumber-java:7.5.0"
+	testImplementation "com.microsoft.playwright:playwright:1.32.0"
+	implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1'
+	implementation 'org.webjars:bootstrap:5.3.1'
+	implementation 'org.webjars:popper.js:2.9.3'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-java8time:3.0.4.RELEASE'
+	implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.4'
+	implementation 'org.webjars.npm:toast-ui__calendar:2.1.3'
+	implementation 'org.webjars:webjars-locator:0.46'
+	implementation 'org.webjars.npm:tui-time-picker:2.1.2'
+	implementation 'org.webjars.npm:tui-date-picker:4.3.3'
+
+	implementation 'com.github.scribejava:scribejava-core:8.3.3'
+
+	testImplementation "io.cucumber:cucumber-junit:7.5.0"
+	testImplementation "org.junit.vintage:junit-vintage-engine:5.7.2"
+}
+
+configurations {
+	cucumberRuntime {
+		extendsFrom testImplementation
+	}
+}
+
+checkstyle {
+	configFile = file("config/checkstyle/checkstyle.xml")
+	configProperties = [    "checkstyleClasspath": configurations.checkstyle.asPath  ]
+}
+
+tasks.register("checkstyle") {
+	dependsOn checkstyleMain, checkstyleTest
+}
+
+
+tasks.register('integration', Test) {
+	group = "verification"
+
+	useJUnitPlatform()
+
+	filter {
+		includeTestsMatching "nz.ac.canterbury.seng302.tab.integration.*"
+	}
+
+	testLogging {
+		events "failed"
+		exceptionFormat "full"
+	}
+
+	finalizedBy jacocoTestReport
+}
+
+tasks.register('end2end') {
+	dependsOn assemble, testClasses
+	group = "verification"
+	doLast {
+		javaexec {
+			main = "io.cucumber.core.cli.Main"
+			classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+			args = [
+					'--plugin', 'pretty',
+					'--plugin', 'html:target/end2end-report.html',
+					'--glue', 'nz/ac/canterbury/seng302/tab/end2end', // points to step definitions and Cucumber config. The root for this is the src/test/java package.
+					'src/test/resources/features/end2end' // points to the feature files. The root for this is the project root.
+			]
+		}
+	}
+}
+tasks.register('codegen') {
+	dependsOn assemble, testClasses
+
+	doLast {
+		javaexec {
+			main = 'com.microsoft.playwright.CLI'
+			classpath = sourceSets.test.runtimeClasspath + sourceSets.main.output + sourceSets.test.output
+			args = [
+					'codegen', 'localhost:8080'
+			]
+		}
+	}
+}
+
+bootRun {
+	// Thymeleaf hot reload
+	jvmArgs = [
+			'-Dspring.thymeleaf.cache=false',
+			'-Dspring.thymeleaf.prefix=file:src/main/resources/templates/',
+			'-Dspring.thymeleaf.suffix=.html',
+			'-Dspring.devtools.restart.enabled=true'
+	]
+
+	doFirst {
+		// Add src/main/resources directory to the classpath
+		classpath = sourceSets.main.runtimeClasspath
+	}
+}
+
+
+tasks.named('test') {
+	useJUnitPlatform()
+
+	filter {
+		includeTestsMatching "nz.ac.canterbury.seng302.tab.unit.*"
+	}
+
+	testLogging {
+		events "failed"
+		exceptionFormat "full"
+	}
+
+	finalizedBy jacocoTestReport
+}
+
+tasks.named("check") {
+	dependsOn test, end2end, integration
+
+	finalizedBy jacocoTestReport
+}
+
+// Jacoco test coverage config
+jacoco {
+	toolVersion = "0.8.9"
+}
+
+// select what reports Jacoco generates and where to put them
+jacocoTestReport {
+
+	executionData fileTree(project.rootDir) {
+		include '**/*.exec'
+	}
+
+	reports {
+		xml.enabled true
+		xml.destination file("${buildDir}/jacoco/test-report.xml")
+		csv.enabled false
+		html.destination file("${buildDir}/jacoco/html")
+	}
+}
+
+sonarqube {
+	properties {
+		property "sonar.projectKey", "team-400"
+		property "sonar.projectName", "team 400"
+		property "sonar.sourceEncoding", "UTF-8"
+		property "sonar.host.url", "https://sonarqube.csse.canterbury.ac.nz"
+		property "sonar.login", "$System.env.SONARQUBE_TOKEN"
+		// For pipelines run for a branch build developmentOnly
+		if(System.env.CI_MERGE_REQUEST_IID == null || System.env.CI_MERGE_REQUEST_IID.trim().isEmpty()) {
+			property "sonar.branch.name", "$System.env.CI_COMMIT_REF_NAME"
+		}
+		// For pipelines to run as part of a merge request
+		else {
+			property "sonar.pullrequest.key", "$System.env.CI_MERGE_REQUEST_IID"
+			property "sonar.pullrequest.branch", "$System.env.CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+			property "sonar.pullrequest.base", "$System.env.CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+		}
+
+	}
+}
+

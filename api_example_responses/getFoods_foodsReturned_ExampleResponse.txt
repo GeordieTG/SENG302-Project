@@ -1,0 +1,330 @@
+[
+  {
+    "foodNutrients": [
+      {
+        "amount": 250,
+        "nutrient": {
+          "number": "208",
+          "unitName": "kcal",
+          "name": "Energy",
+          "rank": 300,
+          "id": 1008
+        },
+        "dataPoints": 0,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "4",
+            "description": "Calculated or imputed",
+            "id": 2
+          },
+          "code": "NC",
+          "description": "Calculated",
+          "id": 49
+        },
+        "id": 1547148,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 11.19,
+        "nutrient": {
+          "number": "203",
+          "unitName": "g",
+          "name": "Protein",
+          "rank": 600,
+          "id": 1003
+        },
+        "dataPoints": 1,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "1",
+            "description": "Analytical or derived from analytical",
+            "id": 1
+          },
+          "code": "A",
+          "description": "Analytical",
+          "id": 1
+        },
+        "id": 1547064,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 15.33,
+        "nutrient": {
+          "number": "204",
+          "unitName": "g",
+          "name": "Total lipid (fat)",
+          "rank": 800,
+          "id": 1004
+        },
+        "dataPoints": 1,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "1",
+            "description": "Analytical or derived from analytical",
+            "id": 1
+          },
+          "code": "A",
+          "description": "Analytical",
+          "id": 1
+        },
+        "id": 1547120,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 16.7,
+        "nutrient": {
+          "number": "205",
+          "unitName": "g",
+          "name": "Carbohydrate, by difference",
+          "rank": 1110,
+          "id": 1005
+        },
+        "dataPoints": 0,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "4",
+            "description": "Calculated or imputed",
+            "id": 2
+          },
+          "code": "NC",
+          "description": "Calculated",
+          "id": 49
+        },
+        "id": 1547147,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 4.11,
+        "nutrient": {
+          "number": "269",
+          "unitName": "g",
+          "name": "Sugars, total including NLEA",
+          "rank": 1510,
+          "id": 2000
+        },
+        "dataPoints": 1,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "1",
+            "description": "Analytical or derived from analytical",
+            "id": 1
+          },
+          "code": "A",
+          "description": "Analytical",
+          "id": 1
+        },
+        "id": 1547125,
+        "type": "FoodNutrient"
+      }
+    ],
+    "foodComponents": [],
+    "dataType": "SR Legacy",
+    "ndbNumber": 21253,
+    "description": "BURGER KING, WHOPPER, with cheese",
+    "fdcId": 170728,
+    "inputFoods": [],
+    "nutrientConversionFactors": [
+      {
+        "proteinValue": 4,
+        "fatValue": 9,
+        "carbohydrateValue": 4,
+        "name": "Calories From Proximates",
+        "id": 13825,
+        "type": ".CalorieConversionFactor"
+      },
+      {
+        "name": "Protein From Nitrogen",
+        "id": 18921,
+        "type": ".ProteinConversionFactor",
+        "value": 6.25
+      }
+    ],
+    "isHistoricalReference": true,
+    "foodPortions": [
+      {
+        "sequenceNumber": 1,
+        "amount": 1,
+        "modifier": "item",
+        "gramWeight": 316,
+        "measureUnit": {
+          "name": "undetermined",
+          "id": 9999,
+          "abbreviation": "undetermined"
+        },
+        "id": 87161
+      }
+    ],
+    "foodClass": "FinalFood",
+    "publicationDate": "4/1/2019",
+    "foodCategory": {
+      "code": "2100",
+      "description": "Fast Foods",
+      "id": 21
+    },
+    "foodAttributes": []
+  },
+  {
+    "foodNutrients": [
+      {
+        "amount": 233,
+        "nutrient": {
+          "number": "208",
+          "unitName": "kcal",
+          "name": "Energy",
+          "rank": 300,
+          "id": 1008
+        },
+        "dataPoints": 0,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "4",
+            "description": "Calculated or imputed",
+            "id": 2
+          },
+          "code": "NC",
+          "description": "Calculated",
+          "id": 49
+        },
+        "id": 1547041,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 10.74,
+        "nutrient": {
+          "number": "203",
+          "unitName": "g",
+          "name": "Protein",
+          "rank": 600,
+          "id": 1003
+        },
+        "min": 10.15,
+        "max": 11.55,
+        "dataPoints": 4,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "1",
+            "description": "Analytical or derived from analytical",
+            "id": 1
+          },
+          "code": "A",
+          "description": "Analytical",
+          "id": 1
+        },
+        "id": 1546994,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 12.84,
+        "nutrient": {
+          "number": "204",
+          "unitName": "g",
+          "name": "Total lipid (fat)",
+          "rank": 800,
+          "id": 1004
+        },
+        "min": 12.74,
+        "max": 12.94,
+        "dataPoints": 4,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "1",
+            "description": "Analytical or derived from analytical",
+            "id": 1
+          },
+          "code": "A",
+          "description": "Analytical",
+          "id": 1
+        },
+        "id": 1546961,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 18.55,
+        "nutrient": {
+          "number": "205",
+          "unitName": "g",
+          "name": "Carbohydrate, by difference",
+          "rank": 1110,
+          "id": 1005
+        },
+        "dataPoints": 0,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "4",
+            "description": "Calculated or imputed",
+            "id": 2
+          },
+          "code": "NC",
+          "description": "Calculated",
+          "id": 49
+        },
+        "id": 1547040,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 4.22,
+        "nutrient": {
+          "number": "269",
+          "unitName": "g",
+          "name": "Sugars, total including NLEA",
+          "rank": 1510,
+          "id": 2000
+        },
+        "min": 4.04,
+        "max": 4.59,
+        "dataPoints": 4,
+        "foodNutrientDerivation": {
+          "foodNutrientSource": {
+            "code": "1",
+            "description": "Analytical or derived from analytical",
+            "id": 1
+          },
+          "code": "A",
+          "description": "Analytical",
+          "id": 1
+        },
+        "id": 1546966,
+        "type": "FoodNutrient"
+      }
+    ],
+    "foodComponents": [],
+    "dataType": "SR Legacy",
+    "ndbNumber": 21252,
+    "description": "BURGER KING, WHOPPER, no cheese",
+    "fdcId": 170727,
+    "inputFoods": [],
+    "nutrientConversionFactors": [
+      {
+        "proteinValue": 4,
+        "fatValue": 9,
+        "carbohydrateValue": 4,
+        "name": "Calories From Proximates",
+        "id": 13824,
+        "type": ".CalorieConversionFactor"
+      }
+    ],
+    "isHistoricalReference": true,
+    "foodPortions": [
+      {
+        "sequenceNumber": 1,
+        "amount": 1,
+        "modifier": "item",
+        "gramWeight": 291,
+        "measureUnit": {
+          "name": "undetermined",
+          "id": 9999,
+          "abbreviation": "undetermined"
+        },
+        "id": 87160
+      }
+    ],
+    "foodClass": "FinalFood",
+    "publicationDate": "4/1/2019",
+    "foodCategory": {
+      "code": "2100",
+      "description": "Fast Foods",
+      "id": 21
+    },
+    "foodAttributes": []
+  }
+]

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:util="java.util">
+<head>
+    <meta charset="UTF-8">
+    <util:import static="com.example.ListUtils.listSplit"/>
+    <title>View Club</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}">
+    <script th:src="@{/JavaScript/main.js}"></script>
+    <script th:src="@{/JavaScript/UserProfile.js}"></script>
+    <script th:src="@{/JavaScript/roles.js}"></script>
+    <script th:src="@{/JavaScript/TeamProfile.js}"></script>
+    <script th:src="@{/JavaScript/calendar.js}"></script>
+    <script th:src="@{/JavaScript/imageHandler.js}"></script>
+    <script th:src="@{/JavaScript/clubCreation.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let csrfToken = /*[[${_csrf.token}]]*/ '';
+        createGlobal(csrfToken)
+        /*]]>*/
+    </script>
+
+</head>
+<body class="bg-body-secondary"
+      onload="checkIfChanged(), calculateHeight(), changeTab(), renderCalendar(events, teamEvents, [])"
+      style="background-repeat: no-repeat;">
+
+<header th:replace="~{fragments/header.html :: header}"></header>
+<div class="m-3" id="column-1">
+    <div class="row">
+
+        <div class="col-12">
+            <!-- Profile Card -->
+            <div class="card d-flex justify-content-end border-0" id="teamBanner"
+                 style="background-image: url(images/test4.jpg);">
+                <div class="card-body p-2 d-flex bg-body" id="teamInfo" style="border-bottom-left-radius: var(--bs-border-radius); border-bottom-right-radius: var(--bs-border-radius);">
+                    <span class="position-absolute top-0 end-0" th:if="${isOwner}">
+                        <a class="btn btn-outline-secondary border-0 p-2 m-2 "
+                           id="editClubBtn" th:href="@{'/editClub?id=' + ${club.getId()}}">
+                            <svg class="bi bi-pencil-square text-body" fill="currentColor" height="16"
+                                 viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                <path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                                      fill-rule="evenodd"/>
+                            </svg>
+                        </a>
+                    </span>
+                    <div class="row m-0 w-100">
+                        <div class="col-12 col-lg-3">
+                            <div class="d-flex justify-content-lg-end justify-content-center position-relative">
+                                <img alt="image not found"
+                                     class="img-fluid rounded-circle profile-picture teamLogo"
+                                     id="picture-id"
+                                     th:src="@{${club.getImage()}}">
+
+                                <div class="position-absolute" style="top: 70%">
+                                    <!-- Change PFP Button-->
+                                    <div th:if="${owner}">
+                                    <label class="btn btn-default"
+                                           for="profilePicture"
+                                           id="profilePictureLabelPlus"
+                                           style="display: inline-block">
+                                        <svg class="bi bi-plus bg-body-secondary text-body border-0 rounded-circle"
+                                             fill="currentColor"
+                                             height="40"
+                                             style="border: 1px solid #ccc; padding: 4px; border-radius: 50%; width: 40px; height: 40px"
+                                             viewBox="0 0 16 16"
+                                             width="40"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                        </svg>
+                                    </label>
+                                    <label class="btn btn-default"
+                                           id="profilePictureLabelTick" style="display: none">
+                                        <svg class="bi bi-check-lg bg-body-secondary border-0 text-body rounded-circle"
+                                             fill="currentColor"
+                                             height="16"
+                                             style="border: 1px solid #ccc; padding: 4px; border-radius: 50%; width:
+                                             40px; height: 40px"
+                                             th:onclick="uploadImage([[${club.id}]], 'club')"
+                                             viewBox="0 0 16 16"
+                                             width="16"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                                        </svg>
+                                    </label>
+                                    <input accept="image/png, image/jpeg, image/svg, image/gif"
+                                           class="form-control editField"
+                                           hidden
+                                           id="profilePicture"
+                                           onchange="handleUpload(event)" required
+                                           th:name="profilePicture"
+                                           type="file">
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4 d-flex">
+                            <div class="d-flex flex-column align-items-lg-start align-items-center w-100  justify-content-lg-evenly">
+                                <h1 class="fw-bold text-body">[[${club.name}]]</h1>
+
+                                <div class="d-flex gap-3 text-body">
+                                    <span th:text="${club.sport}"></span>
+                                    <span>[[${club.location.city + ", " + club.location.country}]]</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4 d-flex flex-column justify-content-center" th:if="${owner}">
+                                <h4 class="fw-bold col-12">Owner</h4>
+                                <div class="d-flex gap-2 align-items-center"
+                                     id="clubSection"
+                                     th:onclick="'window.location.href = \'' + @{/oneUser(id=${owner.getId()})} + '\''">
+                                    <img alt="Image"
+                                         class="img-fluid rounded-circle formation-player-pictures border border-secondary"
+                                         style="width: 3rem; height: 3rem"
+                                         th:src="${owner.getProfilePicture()}"/>
+                                    <span class="text-body" th:text="${owner.getFirstName() + ' ' + owner.getLastName()}"></span>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="row mt-3 gap-3 gap-xl-0">
+        <div class="col-12 col-lg-5 col-xxl-4">
+            <div class="card h-100">
+                <div class="card-header bg-body">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a aria-selected="true" class="nav-link active" data-bs-toggle="tab"
+                               href="#tab-team"
+                               id="teamMembersBtn">Teams</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body" id="column-2">
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active overflow-auto" id="tab-team">
+                            <div th:if="${club.getTeams().size() == 0}"
+                                 th:text="'No Teams in this Club'"></div>
+                            <table class="table table-striped"
+                                   th:if="${club.getTeams().size() != 0}">
+                                <thead>
+                                <tr>
+                                    <th id="rolePicture" scope="col">Profile Picture</th>
+                                    <th id="memberName" scope="col">Team Name</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <div id="teamList"
+
+                                     th:each="team : ${club.getTeams()}">
+                                    <tr style="cursor: pointer" th:onclick="'window.location.href = \'' + @{/viewTeam(id=${team.getId()})} + '\''">
+                                        <td>
+                                            <img alt="image not found"
+                                                 class="profilePicture "
+                                                 style="width:2em; height:2em"
+                                                 th:src="@{${team.getImage()}}">
+                                        </td>
+                                        <td th:id="'team-'+${team.getName()}">
+                                            [[${team.getName()}]]
+                                        </td>
+                                    </tr>
+                                </div>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

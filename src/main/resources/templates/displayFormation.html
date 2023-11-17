@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Display Formation Page</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <!-- Bootstrap CSS -->
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/field.css}">
+</head>
+
+<body class="bg-body-secondary">
+
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<div class="container w-60 mt-3" id="displayedFormation">
+    <div class="card justify-content-center">
+        <div class="d-inline-flex justify-content-center gap-5">
+            <h2 class="text-center mt-4" th:text="'Formation: ' + ${formationForward}"></h2>
+
+
+            <h2 class="text-center mt-4" th:text="'Field Type: ' + ${field}"></h2>
+        </div>
+
+        <header th:replace="~{fragments/formation.html :: formationDisplay(${formation}, ${bgImage}, ${pfp})}"></header>
+        <div class="d-flex justify-content-center pb-3">
+            <a class="w-75 btn btn-secondary mt-4"
+               th:href="@{'viewTeam?id='+${teamId}+'&showAllTeams=0'}">Back</a>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

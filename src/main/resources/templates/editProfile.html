@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}">
+    <link rel="stylesheet" th:href="@{/css/required.css}">
+    <script th:src="@{/JavaScript/navbar.js}"></script>
+    <script th:src="@{/JavaScript/UserProfile.js}"></script>
+    <script th:src="@{/JavaScript/locationAPI.js}"></script>
+    <script th:src="@{/JavaScript/UserTabChange.js}"></script>
+    <script th:src="@{/JavaScript/TeamProfile.js}"></script>
+    <title>User Profile</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+</head>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    function changeDisplayInfo() {
+        setCheckboxes()
+        let invalidSecondTab = [[${invalidSecondTab}]]
+        let invalidThirdTab = [[${invalidThirdTab}]]
+        let tab = [[${tab}]]
+        changeDisplayProfile(invalidSecondTab, invalidThirdTab, tab)
+    }
+
+    /*]]>*/
+</script>
+<body class="bg-body-secondary" onload="changeDisplayInfo()"
+      style="background-repeat: no-repeat;">
+<header th:replace="~{fragments/header.html :: header}"></header>
+<div class="container">
+    <div class="row justify-content-center my-5">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#nav-profile"
+                               id="nav-profile-tab" th:onclick="changeViewHrefProfile('Profile')">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#nav-details"
+                               id="detailsTab"
+                               th:onclick="changeViewHrefProfile('Details')">Details</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#nav-location"
+                               id="locationTab" th:onclick="changeViewHrefProfile('Location')">Location</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <form id="userForm" method="post"
+                          th:action="@{editProfile}" th:object="${userEditProfilePage}">
+                        <div class="tab-content">
+                            <!--Profile picture and Sports Tab-->
+                            <div class="tab-pane fade show active" id="nav-profile">
+                                <div class="d-flex flex-column gap-3">
+                                    <div class="text-center">
+                                        <h3 class="card-title">Your profile</h3>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="favouriteSport">Favourite Sport: </label>
+                                        <div class=" dropdown input-group">
+                                            <input class="form-control" id="favouriteSport"
+                                                   placeholder="None" readonly
+                                                   th:field="*{favouriteSport}" type="text">
+                                            <a aria-expanded="false"
+                                               aria-haspopup="true" aria-label="Toggle sport"
+                                               class="btn btn-secondary dropdown-toggle"
+                                               data
+                                               data-bs-toggle="dropdown" id="sport-dropdown-btn"
+                                               role="button" type="button"></a>
+                                            <ul aria-labelledby="favouriteSport"
+                                                class="dropdown-menu w-100 dropdown-menu-end"
+                                                multiple>
+                                                <li class="dropdown-item"
+                                                    th:each="option : ${options}">
+                                                    <input class="form-check-input"
+                                                           onchange="changeSport(this)"
+                                                           th:checked="${userEditProfilePage.getFavouriteSport().contains(option.name)}"
+                                                           th:id="${option.name}"
+                                                           th:value="${option.name}"
+                                                           type="checkbox"/>
+                                                    <label class="w-100"
+                                                           th:for="${option.name}"
+                                                           th:text="${option.name}"></label>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--Personal Details Tab-->
+                            <div class="tab-pane fade" id="nav-details">
+                                <div class="d-flex flex-column gap-3">
+                                    <div class="text-center">
+                                        <h3 class="card-title">Your Details</h3>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required" for="firstName">First Name: </label>
+                                        <input autofocus class="form-control editField"
+                                               id="firstName" oninput="checkFirstName()"
+                                               placeholder="First Name" th:field="*{firstName}"
+                                               th:style="${invalidFirstName} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div id="firstNameError" style="color:red"
+                                             th:if="true == ${invalidFirstName}">
+                                            [[${invalidFirstNameErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required" for="lastName">Last Name: </label>
+                                        <input class="form-control editField" id="lastName"
+                                               oninput="checkLastName()" placeholder="Last Name"
+                                               th:field="*{lastName}"
+                                               th:style="${invalidLastName} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div id="lastNameError" style="color:red"
+                                             th:if="true == ${invalidLastName}">
+                                            [[${invalidLastNameErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required" for="DOB"> Date of Birth: </label>
+                                        <input class="form-control" id="DOB" oninput="checkAge()"
+                                               placeholder="DD/MM/YYYY"
+                                               th:field="*{dateOfBirth}"
+                                               th:style="${invalidDOB} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="date">
+                                        <div id="dobError" style="color:red"
+                                             th:if="true == ${invalidDOB}">[[${errorDOBMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required" for="email">Email: </label>
+                                        <input class="form-control editField" id="email"
+                                               oninput="checkEmail()"
+                                               placeholder="Email"
+                                               th:field="*{email}"
+                                               th:style="${invalidEmail} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div id="emailError" style="color:red"
+                                             th:if="true == ${invalidEmail}">
+                                            [[${emailErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <a class="btn btn-outline-dark w-100" id="changePasswordBtn"
+                                       th:href="@{changePassword}">Change Password</a>
+                                </div>
+                            </div>
+                            <!--Address & Location Tab-->
+                            <div class="tab-pane fade" id="nav-location">
+                                <div class="d-flex flex-column gap-3">
+                                    <div class="text-center">
+                                        <h3 class="card-title">Your Location</h3>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="address1">
+                                            Address:
+                                        </label>
+                                        <input class="form-control" id="address1"
+                                               list="address_list" oninput="onInput()"
+                                               onkeyup="timerStartOnKeyUpForAddress()"
+                                               placeholder="Street address" th:field="*{address1}"
+                                               th:style="${invalidStreetAddressOne} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <datalist id="address_list"></datalist>
+                                        <div class="errorText"
+                                             style="color: red"
+                                             th:if="${invalidStreetAddressOne == true}">
+                                            [[${streetAddressOneErrorMessage}]]
+                                        </div>
+                                        <br/>
+                                        <input class="form-control" id="address2"
+                                               placeholder="Street address continued"
+                                               th:field="*{address2}"
+                                               th:style="${invalidStreetAddressTwo} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div class="errorText"
+                                             style="color: red"
+                                             th:if="${invalidStreetAddressTwo == true}">
+                                            [[${streetAddressTwoErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="suburb">
+                                            Suburb:
+                                        </label>
+                                        <input class="form-control" id="suburb"
+                                               oninput="checkSuburb()"
+                                               placeholder="Suburb"
+                                               th:field="*{suburb}"
+                                               th:style="${invalidSuburb} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div class="errorText" style="color: red"
+                                             th:if="${invalidSuburb == true}">
+                                            [[${suburbErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required" for="city">
+                                            City:
+                                        </label>
+                                        <input class="form-control" id="city" list="city_list"
+                                               oninput="checkCity()"
+                                               onkeyup="timerStartOnKeyUpForCity()"
+                                               placeholder="City" th:field="*{city}"
+                                               th:style="${validCity} == false ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <datalist id="city_list"></datalist>
+                                        <div class="errorText" style="color: red"
+                                             th:if="${validCity == false}">[[${cityErrorText}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="postcode">
+                                            Postcode:
+                                        </label>
+                                        <input class="form-control" id="postcode"
+                                               oninput="checkPostcode()"
+                                               placeholder="Postcode"
+                                               th:field="*{postcode}"
+                                               th:style="${invalidPostcode} == true ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <div class="errorText" style="color: red"
+                                             th:if="${invalidPostcode == true}">
+                                            [[${postcodeErrorMessage}]]
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required" for="country">
+                                            Country:
+                                        </label>
+                                        <input class="form-control" id="country" list="country_list"
+                                               oninput="checkCountry()"
+                                               onkeyup="timeStartOnKeyUpForCountry()"
+                                               placeholder="Country" th:field="*{country}"
+                                               th:style="${validCountry} == false ? 'border-color:red; outline-color:red' : 'border-color:none'"
+                                               type="text">
+                                        <datalist id="country_list"></datalist>
+                                        <div class="errorText" style="color: red"
+                                             th:if="${validCountry == false}">
+                                            [[${countryErrorText}]]
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between my-3">
+
+                            <a class="btn btn-secondary sub-can-btn" id="cancelEditBtn"
+                               style="width: 45%" th:href="@{'profilePage?tab=' + ${tab}}"
+                               th:if="!${customRedirectNeeded}">Cancel</a>
+                            <a class="btn btn-secondary sub-can-btn" style="width: 45%"
+                               th:href="@{'/profilePage?searchQuery=' + ${searchName} + '&sportQuery=' + ${searchQuerySport} + '&cityQuery=' + ${searchQueryCity} + '&pageNumber=' + ${pageNumber}}"
+                               th:if="${customRedirectNeeded}">Cancel</a>
+                            <button class="btn btn-primary" id="submitDetailsBtn" style="width: 45%"
+                                    type="submit">Submit
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

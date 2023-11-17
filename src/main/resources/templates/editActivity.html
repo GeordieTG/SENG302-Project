@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>Edit Activity</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <link rel="stylesheet" th:href="@{/css/required.css}">
+    <script th:src="@{/JavaScript/main.js}"></script>
+    <script th:src="@{/JavaScript/locationAPI.js}"></script>
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+</head>
+<body class="bg-body-secondary">
+
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<div class="d-flex align-items-center" style="height:80%">
+
+    <div class="container" style="width:50%">
+        <div class="card">
+            <div class="card-body px-4 py-4">
+
+                <form id="activityForm" method="post" th:action="@{editActivity}"
+                      th:id="activityForm" th:name="activityForm" th:object="${activityForm}">
+                    <input hidden id="url" th:name="url" type="text">
+                    <h4>Edit Activity</h4>
+
+                    <div id="page-1">
+                        <p style="color:grey">Edit your activity</p>
+                        <input class="form-control" data-cy="id" id="id" readonly
+                               th:field="*{id}" th:name="id" type="hidden">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="team"> Team: </label>
+                                <select class="form-select" id="team" th:name="team">
+                                    <option th:value="-1">No Team</option>
+                                    <div th:each="team : ${usersTeams}">
+                                        <option th:selected="${activityForm.teamId == team.id}"
+                                                th:text="${team.name}"
+                                                th:value="${team.id}"></option>
+                                    </div>
+                                </select>
+                                <div ; id="teamError" style="color:red"
+                                     th:if="true == ${teamError}">You must select a team for this
+                                    activity type
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="required" for="type"> Type: </label>
+                                <select class="form-select" id="type" th:name="type">
+                                    <option selected th:value="none">Select Type</option>
+                                    <option th:selected="${activityForm.type == 'Game'}"
+                                            th:value="Game">Game
+                                    </option>
+                                    <option th:selected="${activityForm.type == 'Friendly'}"
+                                            th:value="Friendly">
+                                        Friendly
+                                    </option>
+                                    <option th:selected="${activityForm.type == 'Training'}"
+                                            th:value="Training">
+                                        Training
+                                    </option>
+                                    <option th:selected="${activityForm.type == 'Competition'}"
+                                            th:value="Competition">
+                                        Competition
+                                    </option>
+                                    <option th:selected="${activityForm.type == 'Other'}"
+                                            th:value="Other">Other
+                                    </option>
+                                </select>
+                                <div ; id="typeError" style="color:red"
+                                     th:if="true == ${typeError}">You must select an activity type
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="required" for="startTime"> Start: </label>
+                                <input autofocus class="form-control" id="startTime"
+                                       th:name="startTime" th:value="*{startTime}"
+                                       type="datetime-local">
+                                <div ; id="startTimeError" style="color:red"
+                                     th:if="true == ${startTimeError}">Start time is compulsory
+                                </div>
+                                <div ; id="startCreationTimeError" style="color:red"
+                                     th:if="${startCreationTimeError}"
+                                     th:text="${startCreationTimeError}"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="required" for="endTime"> End: </label>
+                                <input autofocus class="form-control" id="endTime"
+                                       th:name="endTime" th:value="*{endTime}"
+                                       type="datetime-local">
+                                <div ; id="endTimeError" style="color:red"
+                                     th:if="true == ${endTimeError}">End time is compulsory
+                                </div>
+                                <div ;
+                                     id="endTimeBeforeStartTimeError" style="color:red"
+                                     th:if="true == ${endTimeBeforeStartTimeError}">End time
+                                    is before start time
+                                </div>
+                                <div ; id="endCreationTimeError" style="color:red"
+                                     th:if="${endCreationTimeError}"
+                                     th:text="${endCreationTimeError}"></div>
+
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="required" for="description">Description:</label>
+                                <textarea class="form-control" id="description"
+                                          placeholder="Description"
+                                          th:field="*{description}"
+                                          type="text"></textarea>
+                                <div ; id="descriptionError" style="color:red"
+                                     th:if="true == ${descriptionError}">Description is invalid
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-around">
+                                <a class="btn btn-secondary mt-4" onclick="history.back()"
+                                   style="width:45%"
+                                   type="button">Cancel</a>
+                                <button class="btn btn-primary mt-4" id="nextPageButton"
+                                        onclick="nextPage()"
+                                        style="width:45%" type="button">Next
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div id="page-2" style="display:none">
+                        <p style="color:grey" }>Almost there - just a few more things</p>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="required" for="address1">Address:</label>
+                                <input autocomplete="false" class="form-control" data-cy="address1"
+                                       id="address1"
+                                       list="address_list" oninput="onInput()"
+                                       onkeyup="timerStartOnKeyUpForAddress()"
+                                       placeholder="Street address"
+                                       th:field="*{address1}" th:name="address1"
+                                       type="text"/>
+                                <datalist id="address_list"></datalist>
+                                <div class="errorText" id="validAddressError"
+                                     style="color: red" th:if="${validAddress == false}"
+                                     th:text="'Please enter an address'"></div>
+                                <input autofocus class="form-control mt-2" data-cy="address2"
+                                       id="address2"
+                                       placeholder="Street address continued" th:field="*{address2}"
+                                       th:name="address2" type="text">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="suburb">Suburb:</label>
+                                <input class="form-control" data-cy="suburb" id="suburb"
+                                       placeholder="Suburb"
+                                       th:field="*{suburb}" th:name="suburb"
+                                       type="text"/>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="required" for="city">City:</label>
+                                <input autofocus class="form-control" data-cy="city" id="city"
+                                       list="city_list" onkeyup="timerStartOnKeyUpForCity()"
+                                       placeholder="City" th:field="*{city}"
+                                       th:name="city" type="text">
+                                <datalist id="city_list"></datalist>
+                                <div class="errorText" id="validCityError"
+                                     style="color: red" th:if="${validCity == false}"
+                                     th:text="'Please enter a city'"></div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="required" for="postcode">Postcode:</label>
+                                <input class="form-control" data-cy="postcode" id="postcode"
+                                       placeholder="Postcode"
+                                       th:field="*{postcode}" th:name="postcode"
+                                       type="text">
+                                <div class="errorText" id="validPostcodeError"
+                                     style="color: red" th:if="${validPostcode == false}"
+                                     th:text="'Please enter a postcode'"></div>
+
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="required" for="country">Country:</label>
+                                <input class="form-control" data-cy="country" id="country"
+                                       list="country_list" onkeyup="timeStartOnKeyUpForCountry()"
+                                       placeholder="Country"
+                                       th:field="*{country}" th:name="country"
+                                       type="text">
+                                <datalist id="country_list"></datalist>
+                                <div class="errorText" id="validCountryError"
+                                     style="color: red" th:if="${validCountry == false}"
+                                     th:text="'Please enter a country'"></div>
+                            </div>
+                            <div class="d-flex justify-content-around">
+                                <button class="btn btn-secondary mt-4" onclick="previousPage()"
+                                        style="width:45%" type="button">
+                                    Previous
+                                </button>
+                                <button class="btn btn-primary mt-4" id="saveActivityButton"
+                                        style="width:45%" type="submit">Save Activity
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

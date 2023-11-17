@@ -1,0 +1,283 @@
+[
+  {
+    "marketCountry": "United States",
+    "foodNutrients": [
+      {
+        "amount": 58,
+        "nutrient": {
+          "number": "208",
+          "unitName": "kcal",
+          "name": "Energy",
+          "rank": 300,
+          "id": 1008
+        },
+        "foodNutrientDerivation": {
+          "code": "LCCS",
+          "description": "Calculated from value per serving size measure",
+          "id": 70
+        },
+        "id": 17019418,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 4.58,
+        "nutrient": {
+          "number": "269",
+          "unitName": "g",
+          "name": "Sugars, total including NLEA",
+          "rank": 1510,
+          "id": 2000
+        },
+        "foodNutrientDerivation": {
+          "code": "LCCS",
+          "description": "Calculated from value per serving size measure",
+          "id": 70
+        },
+        "id": 17019419,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 3.33,
+        "nutrient": {
+          "number": "203",
+          "unitName": "g",
+          "name": "Protein",
+          "rank": 600,
+          "id": 1003
+        },
+        "foodNutrientDerivation": {
+          "code": "LCCS",
+          "description": "Calculated from value per serving size measure",
+          "id": 70
+        },
+        "id": 17019415,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 5.42,
+        "nutrient": {
+          "number": "205",
+          "unitName": "g",
+          "name": "Carbohydrate, by difference",
+          "rank": 1110,
+          "id": 1005
+        },
+        "foodNutrientDerivation": {
+          "code": "LCCS",
+          "description": "Calculated from value per serving size measure",
+          "id": 70
+        },
+        "id": 17019417,
+        "type": "FoodNutrient"
+      },
+      {
+        "amount": 2.08,
+        "nutrient": {
+          "number": "204",
+          "unitName": "g",
+          "name": "Total lipid (fat)",
+          "rank": 800,
+          "id": 1004
+        },
+        "foodNutrientDerivation": {
+          "code": "LCCS",
+          "description": "Calculated from value per serving size measure",
+          "id": 70
+        },
+        "id": 17019416,
+        "type": "FoodNutrient"
+      }
+    ],
+    "packageWeight": "",
+    "description": "VANILLA ORGANIC SESAMEMILK, VANILLA",
+    "availableDate": "4/8/2020",
+    "brandedFoodCategory": "Plant Based Milk",
+    "servingSizeUnit": "ml",
+    "ingredients": "SESAMEMILK (WATER, SESAMEIN (ORGANIC SESAME PROTEIN CONCENTRATE, ORGANIC PEA PROTEIN CONCENTRATE, ORGANIC NATURAL FLAVOR)), ORGANIC CANE SUGAR, ORGANIC SUNFLOWER OIL, CALCIUM PHOSPHATE, NATURAL FLAVORS, SEA SALT, ORGANIC SUNFLOWER LECITHIN, ORGANIC NATURAL FLAVOR, GELLAN GUM, VITAMIN D2.",
+    "labelNutrients": {
+      "carbohydrates": {
+        "value": 13
+      },
+      "saturatedFat": {
+        "value": 0.504
+      },
+      "sodium": {
+        "value": 106
+      },
+      "fiber": {
+        "value": 0.96
+      },
+      "sugars": {
+        "value": 11
+      },
+      "calcium": {
+        "value": 300
+      },
+      "protein": {
+        "value": 7.99
+      },
+      "fat": {
+        "value": 4.99
+      },
+      "transFat": {
+        "value": 0
+      },
+      "cholesterol": {
+        "value": 0
+      },
+      "iron": {
+        "value": 1.8
+      },
+      "calories": {
+        "value": 139
+      }
+    },
+    "publicationDate": "2/26/2021",
+    "servingSize": 240,
+    "foodAttributes": [
+      {
+        "name": "Added Brand/Sub Brand Information",
+        "id": 1412503,
+        "value": 10
+      }
+    ],
+    "brandName": "HOPE & SESAME",
+    "foodComponents": [],
+    "foodUpdateLog": [
+      {
+        "marketCountry": "United States",
+        "brandName": "HOPE & SESAME",
+        "packageWeight": "33.8 fl oz/1 L",
+        "dataType": "Branded",
+        "brandOwner": "SnackHack, LLC ",
+        "description": "VANILLA ORGANIC SESAMEMILK, VANILLA",
+        "availableDate": "4/8/2020",
+        "fdcId": 2149248,
+        "brandedFoodCategory": "Plant Based Milk",
+        "servingSizeUnit": "ml",
+        "modifiedDate": "4/8/2020",
+        "gtinUpc": "819561021436",
+        "ingredients": "SESAMEMILK (WATER, SESAMEIN (ORGANIC SESAME PROTEIN CONCENTRATE, ORGANIC PEA PROTEIN CONCENTRATE, ORGANIC NATURAL FLAVOR)), ORGANIC CANE SUGAR, ORGANIC SUNFLOWER OIL, CALCIUM PHOSPHATE, NATURAL FLAVORS, SEA SALT, ORGANIC SUNFLOWER LECITHIN, ORGANIC NATURAL FLAVOR, GELLAN GUM, VITAMIN D2.",
+        "foodClass": "Branded",
+        "discontinuedDate": "",
+        "publicationDate": "10/28/2021",
+        "dataSource": "LI",
+        "servingSize": 240,
+        "foodAttributes": []
+      },
+      {
+        "marketCountry": "United States",
+        "brandName": "HOPE & SESAME",
+        "dataType": "Branded",
+        "brandOwner": "SnackHack, LLC ",
+        "description": "VANILLA ORGANIC SESAMEMILK, VANILLA",
+        "availableDate": "4/8/2020",
+        "fdcId": 1707024,
+        "brandedFoodCategory": "Plant Based Milk",
+        "servingSizeUnit": "ml",
+        "modifiedDate": "4/8/2020",
+        "gtinUpc": "819561021436",
+        "ingredients": "SESAMEMILK (WATER, SESAMEIN (ORGANIC SESAME PROTEIN CONCENTRATE, ORGANIC PEA PROTEIN CONCENTRATE, ORGANIC NATURAL FLAVOR)), ORGANIC CANE SUGAR, ORGANIC SUNFLOWER OIL, CALCIUM PHOSPHATE, NATURAL FLAVORS, SEA SALT, ORGANIC SUNFLOWER LECITHIN, ORGANIC NATURAL FLAVOR, GELLAN GUM, VITAMIN D2.",
+        "foodClass": "Branded",
+        "discontinuedDate": "",
+        "publicationDate": "3/19/2021",
+        "dataSource": "LI",
+        "servingSize": 240,
+        "foodAttributes": []
+      },
+      {
+        "marketCountry": "United States",
+        "brandName": "HOPE & SESAME",
+        "packageWeight": "",
+        "dataType": "Branded",
+        "brandOwner": "SnackHack, LLC ",
+        "description": "VANILLA ORGANIC SESAMEMILK, VANILLA",
+        "availableDate": "4/8/2020",
+        "notaSignificantSourceOf": "",
+        "fdcId": 1414744,
+        "brandedFoodCategory": "Plant Based Milk",
+        "subbrandName": "",
+        "servingSizeUnit": "ml",
+        "modifiedDate": "4/8/2020",
+        "gtinUpc": "819561021436",
+        "ingredients": "SESAMEMILK (WATER, SESAMEIN (ORGANIC SESAME PROTEIN CONCENTRATE, ORGANIC PEA PROTEIN CONCENTRATE, ORGANIC NATURAL FLAVOR)), ORGANIC CANE SUGAR, ORGANIC SUNFLOWER OIL, CALCIUM PHOSPHATE, NATURAL FLAVORS, SEA SALT, ORGANIC SUNFLOWER LECITHIN, ORGANIC NATURAL FLAVOR, GELLAN GUM, VITAMIN D2.",
+        "foodClass": "Branded",
+        "discontinuedDate": "",
+        "publicationDate": "2/26/2021",
+        "dataSource": "LI",
+        "servingSize": 240,
+        "foodAttributes": []
+      },
+      {
+        "marketCountry": "United States",
+        "dataType": "Branded",
+        "brandOwner": "SnackHack, LLC ",
+        "description": "VANILLA ORGANIC SESAMEMILK, VANILLA",
+        "availableDate": "4/8/2020",
+        "fdcId": 1127425,
+        "brandedFoodCategory": "Plant Based Milk",
+        "servingSizeUnit": "ml",
+        "modifiedDate": "4/8/2020",
+        "gtinUpc": "819561021436",
+        "ingredients": "SESAMEMILK (WATER, SESAMEIN (ORGANIC SESAME PROTEIN CONCENTRATE, ORGANIC PEA PROTEIN CONCENTRATE, ORGANIC NATURAL FLAVOR)), ORGANIC CANE SUGAR, ORGANIC SUNFLOWER OIL, CALCIUM PHOSPHATE, NATURAL FLAVORS, SEA SALT, ORGANIC SUNFLOWER LECITHIN, ORGANIC NATURAL FLAVOR, GELLAN GUM, VITAMIN D2.",
+        "foodClass": "Branded",
+        "discontinuedDate": "",
+        "publicationDate": "11/13/2020",
+        "dataSource": "LI",
+        "servingSize": 240,
+        "foodAttributes": []
+      },
+      {
+        "marketCountry": "United States",
+        "dataType": "Branded",
+        "brandOwner": "SnackHack, LLC ",
+        "description": "VANILLA ORGANIC SESAMEMILK, VANILLA",
+        "availableDate": "4/8/2020",
+        "householdServingFullText": "8 OZA",
+        "fdcId": 916942,
+        "brandedFoodCategory": "Plant Based Milk",
+        "servingSizeUnit": "ml",
+        "modifiedDate": "4/8/2020",
+        "gtinUpc": "819561021436",
+        "ingredients": "SESAMEMILK (WATER, SESAMEIN (ORGANIC SESAME PROTEIN CONCENTRATE, ORGANIC PEA PROTEIN CONCENTRATE, ORGANIC NATURAL FLAVOR)), ORGANIC CANE SUGAR, ORGANIC SUNFLOWER OIL, CALCIUM PHOSPHATE, NATURAL FLAVORS, SEA SALT, ORGANIC SUNFLOWER LECITHIN, ORGANIC NATURAL FLAVOR, GELLAN GUM, VITAMIN D2.",
+        "foodClass": "Branded",
+        "discontinuedDate": "",
+        "publicationDate": "5/28/2020",
+        "dataSource": "LI",
+        "servingSize": 240,
+        "foodAttributes": []
+      },
+      {
+        "marketCountry": "United States",
+        "dataType": "Branded",
+        "brandOwner": "SnackHack, LLC ",
+        "description": "VANILLA ORGANIC SESAMEMILK",
+        "availableDate": "2/24/2020",
+        "householdServingFullText": "8 OZA",
+        "fdcId": 807933,
+        "brandedFoodCategory": "Plant Based Milk",
+        "servingSizeUnit": "ml",
+        "modifiedDate": "2/24/2020",
+        "gtinUpc": "819561021436",
+        "ingredients": "SESAMEMILK (WATER, SESAMEIN (ORGANIC SESAME PROTEIN CONCENTRATE, ORGANIC PEA PROTEIN CONCENTRATE, ORGANIC NATURAL FLAVOR)), ORGANIC CANE SUGAR, ORGANIC SUNFLOWER OIL, CALCIUM PHOSPHATE, NATURAL FLAVORS, SEA SALT, ORGANIC SUNFLOWER LECITHIN, ORGANIC NATURAL FLAVOR, GELLAN GUM, VITAMIN D2.",
+        "foodClass": "Branded",
+        "discontinuedDate": "",
+        "publicationDate": "4/1/2020",
+        "dataSource": "LI",
+        "servingSize": 240,
+        "foodAttributes": []
+      }
+    ],
+    "dataType": "Branded",
+    "brandOwner": "SnackHack, LLC ",
+    "notaSignificantSourceOf": "",
+    "fdcId": 1414744,
+    "subbrandName": "",
+    "modifiedDate": "4/8/2020",
+    "gtinUpc": "819561021436",
+    "foodPortions": [],
+    "foodClass": "Branded",
+    "discontinuedDate": "",
+    "dataSource": "LI"
+  }
+]

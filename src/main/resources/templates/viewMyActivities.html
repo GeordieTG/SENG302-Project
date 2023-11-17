@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Activities</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+    <script th:src="@{/JavaScript/TeamProfile.js}"></script>
+    <script th:src="@{/JavaScript/calendar.js}"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+            let events = [[${events}]];
+            let teamEvents = [[${teamEvents}]];
+        /*]]>*/
+    </script>
+</head>
+
+<body class="bg-body-secondary" onload="renderCalendar(events, teamEvents, [])">
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<div class="container">
+    <div class="card">
+        <div class="card-body px-5">
+            <div class="text-center">
+                <h3 class="card-title" id="userActivitiesHeader">[[${user.firstName}]]'s
+                    Activities</h3>
+            </div>
+            <div class="text-center"
+                 style="margin-bottom: 20px"
+                 th:if="${totalActivitySize} == 0 and ${personalActivitiesSize} == 0">You have no
+                upcoming activities
+            </div>
+        </div>
+        <h1 class="mb-1" id="currentMonth" style="width: 30%; margin-left: 10%;"></h1>
+        <div class="mb-1 d-flex gap-2" style="width: 30%; margin-left: 10%;">
+            <button class="btn btn-secondary" id="today-btn">
+                Today
+            </button>
+            <button class="btn btn-secondary" id="prev-month-btn">
+                <svg class="bi bi-arrow-left-short" fill="currentColor" height="32"
+                     viewBox="0 0 16 16"
+                     width="32" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"
+                          fill-rule="evenodd"/>
+                </svg>
+            </button>
+            <button class="btn btn-secondary" id="next-month-btn">
+                <svg class="bi bi-arrow-right-short" fill="currentColor" height="32"
+                     viewBox="0 0 16 16"
+                     width="32" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+                          fill-rule="evenodd"/>
+                </svg>
+            </button>
+            <button aria-expanded="false" class="btn btn-primary dropdown-toggle "
+                    data-bs-toggle="dropdown" id="sport-filter-dropdown-btn"
+                    type="button">Filter Sports
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <div class="form-check mx-3 py-1">
+                        <input class="form-check-input"
+                               id="select-all-checkbox"
+                               onchange="handleSelectAll(this)"
+                               type="checkbox"/>
+                        <label class="form-check-label" for="select-all-checkbox">Select
+                            All</label>
+                    </div>
+                </li>
+                <div class="dropdown-divider"></div>
+                <li th:each="sport, iStat : ${sports}">
+                    <div class="form-check mx-3 py-1">
+                        <input onchange="renderCalendar(events, teamEvents,
+                        getSelectedSports())"
+                               th:class="'form-check-input' + ' sport-index-'+${iStat.index}"
+                               th:id="${sport}" th:value="${sport}"
+                               type="checkbox"/>
+                        <label class="form-check-label" th:for="${sport}"
+                               th:text="${sport}"></label>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+
+        <div id="calendar"
+             style="margin-left: 10%; margin-right: 10%; margin-bottom: 2%; height: 600px; border: 1px solid grey"></div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

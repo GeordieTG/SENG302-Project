@@ -1,0 +1,122 @@
+/*Slide in animation*/
+.text-animate {
+    animation: text-animation 750ms ease-out;
+}
+
+@keyframes text-animation {
+    0% {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/*Colourful Animation*/
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.item {
+    position: absolute;
+    background-color: transparent;
+    width: calc(var(--i) * 2.5vmin);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: .9vmin solid rgb(0, 200, 255);
+    transform-style: preserve-3d;
+    transform: rotateX(70deg) translateZ(50px);
+    animation: my-move 2.5s ease-in-out calc(var(--i) * 0.08s) infinite;
+    box-shadow: 0px 0px 15px rgb(124, 124, 124),
+    inset 0px 0px 0px rgb(124, 124, 124);
+}
+
+@keyframes my-move {
+    0%,
+    100% {
+        transform: rotateX(70deg) translateZ(50px) translateY(0px);
+        filter: hue-rotate(0deg);
+    }
+
+    50% {
+        transform: rotateX(70deg) translateZ(50px) translateY(-50vmin);
+        filter: hue-rotate(180deg);
+    }
+}
+
+/*Button*/
+a {
+    --hover-color: #645bff;
+    --arrow-width: 10px;
+    --arrow-stroke: 2px;
+    text-decoration: none;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 20px;
+    color: white;
+    padding: 1em 1.8em;
+    background: #1a1a1a;
+    display: flex;
+    transition: 0.2s background;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6em;
+    font-weight: bold;
+}
+
+a .arrow-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+a .arrow {
+    margin-top: 1px;
+    width: var(--arrow-width);
+    background: #1a1a1a;
+    height: var(--arrow-stroke);
+    position: relative;
+    transition: 0.2s;
+}
+
+a .arrow::before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    border: solid #fff;
+    border-width: 0 var(--arrow-stroke) var(--arrow-stroke) 0;
+    display: inline-block;
+    top: -3px;
+    right: 3px;
+    transition: 0.2s;
+    padding: 3px;
+    transform: rotate(-45deg);
+}
+
+a:hover {
+    color: #1a1a1a;
+    background-color: white;
+}
+
+a:hover .arrow {
+    background: #1a1a1a;
+}
+
+a:hover .arrow:before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    border: solid #1a1a1a;
+    border-width: 0 var(--arrow-stroke) var(--arrow-stroke) 0;
+    display: inline-block;
+    top: -3px;
+    transition: 0.2s;
+    padding: 3px;
+    transform: rotate(-45deg);
+    right: 0;
+}

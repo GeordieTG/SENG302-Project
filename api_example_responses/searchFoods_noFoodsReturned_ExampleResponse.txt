@@ -1,0 +1,25 @@
+{
+    "foodSearchCriteria": {
+        "pageNumber": 1,
+        "generalSearchInput": "adfdafdaggadagadg",
+        "dataType": [
+            "SR Legacy"
+        ],
+        "query": "adfdafdaggadagadg",
+        "numberOfResultsPerPage": 50,
+        "pageSize": 20,
+        "requireAllWords": false,
+        "foodTypes": [
+            "SR Legacy"
+        ]
+    },
+    "foods": [],
+    "totalHits": 0,
+    "totalPages": 0,
+    "pageList": [],
+    "currentPage": 1,
+    "aggregations": {
+        "dataType": {},
+        "nutrients": {}
+    }
+}

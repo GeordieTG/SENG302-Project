@@ -1,0 +1,19 @@
+.meal {
+    text-decoration: none;
+    margin-bottom: 1.5em;
+}
+
+#recentFoodsDiv {
+    border: 1px solid #cccccc;
+    width: 70%;
+    padding: 2em;
+    border-radius: 10px;
+    margin: 1.5rem auto auto;
+}
+
+.meal:hover {
+    background-color: #cccccc;
+    transition: 400ms ease-in;
+    border-radius: 4px;
+    color: var(--bs-dark);
+}

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- required meta -->
+    <meta lang="en">
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+    <!-- style -->
+    <style>
+        html, body {
+            height: 100vh;
+        }
+    </style>
+
+    <!-- Scripts -->
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/required.css}">
+    <script th:src="@{/JavaScript/locationAPI.js}"></script>
+
+    <title>Create Team</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+</head>
+
+<body class="bg-body-secondary">
+
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<div class="container-fluid w-50 h-75 d-flex justify-content-center align-items-center">
+    <div class="card justify-content-center align-items-center">
+        <div class="card-body px-4 py-4">
+            <div class="carousel slide" data-bs-interval="false" id="team-reg-carousel">
+                <form enctype="multipart/form-data" method="post" th:action="@{createTeam}"
+                      th:object="${createTeamForm}">
+
+                    <div class="carousel-inner">
+
+                        <!-- carousel indicator-->
+                        <ol class="carousel-indicators  position-relative top">
+                            <li class="active" data-bs-slide-to="0"
+                                data-bs-target="#team-reg-carousel" hidden></li>
+                            <li data-bs-slide-to="1" data-bs-target="#team-reg-carousel"
+                                hidden></li>
+                        </ol>
+
+                        <!-- name slide-->
+                        <div class="carousel-item active" id="name-slide">
+                            <div class="d-flex flex-column justify-content-evenly align-items-center gap-3">
+                                <div class="form-group row w-100 gap-3">
+                                    <div class="col-md-12">
+                                        <h4>Create Team</h4>
+                                        <p style="color: grey;"> Register your team on ConQuest - Start
+                                            your legacy</p>
+
+                                        <!--Name Selection-->
+                                        <label class="required" for="team_name">Name</label>
+                                        <input aria-describedby="teamNameHelp" autofocus
+                                               class="form-control"
+                                               id="team_name"
+                                               placeholder="Team name"
+                                               th:field="*{name}" type="text">
+                                        <small class="text-danger form-text" id="teamNameHelp"
+                                               th:if="${validName == false}"
+                                               th:text="'Team Name must contain only letters, or the following special characters \'{\', \'}\', \'.\''"></small>
+                                    </div>
+
+                                    <!--Sport Selection-->
+                                    <div class="col-md-12">
+                                        <label class="required" for="sport">Sport</label>
+                                        <select class="form-select" id="sport" th:name="sport">
+                                            <option selected th:value="NONE">Select Type</option>
+                                            <option th:each="sport : ${supportedSports}"
+                                                    th:selected="${createTeamForm.getSport() != null && createTeamForm.getSport().equals(sport)}"
+                                                    th:text="${sport}" th:value="${sport}"></option>
+                                        </select>
+                                        <small class="form-text text-danger" id="sportHelp"
+                                               th:if="${validSport == false}"
+                                               th:text="'Sport field must contain only letters!'"></small>
+                                    </div>
+
+                                    <!--Next Button-->
+                                    <div class="d-flex justify-content-between w-100 mt-4">
+                                        <a class="btn btn-secondary" style="width: 45%"
+                                           th:href="@{home}">Cancel</a>
+                                        <a class="btn btn-primary" data-bs-slide="next"
+                                           data-bs-target="#team-reg-carousel"
+                                           id="next_button" role="button"
+                                           style="width: 45%">Next</a>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <!-- address slide -->
+                        <div class="carousel-item" id="address-slide">
+                            <div class="d-flex flex-column justify-content-evenly align-items-center gap-3">
+                                <div class="row g-3">
+                                    <div class="col-md-12">
+                                        <label class="col-12 col-form-label"
+                                               for="address1">Address</label>
+                                        <input class="form-control" data-cy="address1" id="address1"
+                                               list="address_list"
+                                               oninput="onInput()"
+                                               onkeyup="timerStartOnKeyUpForAddress()"
+                                               placeholder="Street address"
+                                               th:field="*{address1}" type="text">
+                                        <datalist id="address_list"></datalist>
+                                        <label class="col-form-label"></label>
+                                        <input autofocus class="form-control" data-cy="address2"
+                                               id="address2"
+                                               placeholder="Street address continued"
+                                               th:field="*{address2}" type="text">
+                                    </div>
+                                    <small class="text-danger form-text" id="address2Help"
+                                           th:if="${invalidStreetAddressTwo == true}"
+                                           th:text="'Please enter a valid address with no characters'"></small>
+
+                                    <div class="col-md-6">
+                                        <label class="col-form-label" for="suburb">Suburb</label>
+                                        <input class="form-control" id="suburb" placeholder="Suburb"
+                                               th:field="*{suburb}" type="text">
+                                        <small class="text-danger form-text" id="suburbHelp"
+                                               th:if="${invalidSuburb == true}"
+                                               th:text="'Please enter a valid suburb that contains only letters'"></small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="col-form-label required"
+                                               for="city">City</label>
+                                        <input aria-describedby="cityHelp" autofocus
+                                               class="form-control"
+                                               data-cy="city"
+                                               id="city"
+                                               list="city_list" oninput="checkCity()"
+                                               onkeyup="timerStartOnKeyUpForCity()"
+                                               placeholder="City"
+                                               th:field="*{city}" type="text">
+                                        <datalist id="city_list"></datalist>
+                                        <small class="text-danger form-text" id="cityHelp"
+                                               th:if="${validCity == false}"
+                                               th:text="'Please enter a valid city that contains only letters'"></small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="col-form-label"
+                                               for="postcode">Postcode</label>
+                                        <input class="form-control" data-cy="postcode" id="postcode"
+                                               placeholder="Postcode"
+                                               th:field="*{postcode}"
+                                               type="text">
+                                        <small class="text-danger form-text" id="postCodeHelp"
+                                               th:if="${invalidPostcode == true}"
+                                               th:text="'Please enter a valid postcode'"></small>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="col-form-label required" for="country">Country
+                                        </label>
+                                        <input aria-describedby="countryHelp" class="form-control"
+                                               data-cy="country" id="country"
+                                               list="country_list"
+                                               oninput="checkCountry()"
+                                               onkeyup="timeStartOnKeyUpForCountry()"
+                                               placeholder="Country" th:field="*{country}"
+                                               type="text">
+                                        <datalist id="country_list"></datalist>
+                                        <small class="form-text text-danger" id="countryHelp"
+                                               th:if="${validCountry == false}"
+                                               th:text="'Please enter a valid country that contains only letters'"></small>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center w-100">
+                                    <a class="btn btn-secondary" data-bs-slide-to="prev"
+                                       data-bs-target="#team-reg-carousel"
+                                       role="button">Previous</a>
+                                    <button class="btn btn-primary" id="submit_button" role="button"
+                                            type="submit">Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Bootstrap JS -->
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+
+</body>
+</html>

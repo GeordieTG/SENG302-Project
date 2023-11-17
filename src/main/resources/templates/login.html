@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+
+    <title>ConQuest - Login</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/required.css}">
+
+</head>
+<body class="bg-body-secondary">
+
+<header th:replace="fragments/welcomeHeader.html :: header"></header>
+
+<div class="d-flex align-items-center" style="height:70%">
+
+    <div class="container mt-5" style="width:50%;">
+        <div class="card">
+            <div class="card-body px-4 py-4">
+                <h4>Login</h4>
+                <p style="color: grey;">Jump back in - or register <a th:href="@{/registration}">here</a></p>
+                <p id='activatedEmail' style="color:green" th:name="activatedEmail"
+                   th:text="${activatedEmail}"></p>
+                <p id='registrationEmailSent' style="color:Black" th:name="registrationEmailSent"
+                   th:text="${registrationEmailSent}"></p>
+                <form id="loginForm" method="post" th:action="@{login}">
+                    <div class="mb-3">
+                        <label class="form-label required" for="username">Email:</label>
+                        <input autofocus class="form-control" id="username" placeholder="Email"
+                               th:name="username" th:value="*{username}" type="text">
+                    </div>
+                    <div class="mb-2" id="error-msg" style="color: red"></div>
+                    <div class="mb-3">
+                        <label class="form-label text-start required"
+                               for="password">Password</label>
+                        <input class="form-control" id="password" placeholder="Password"
+                               th:name="password" th:value="*{password}" type="password"/>
+                        <div class="form-text" id="emailHelp"><a th:href="@{/lostPassword}">Lost
+                            Password?</a></div>
+                    </div>
+                    <p hidden id="errorMessage" style="color: red">The email address is not
+                        registered to an account or the password is invalid.</p>
+                    <div class="d-flex justify-content-around pt-3">
+                        <a class="btn btn-secondary" style="width:45%" th:href="@{demo}">Cancel</a>
+                        <button class="btn btn-primary" id="loginSubmitButton" style="width:45%"
+                                type="submit">Login
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Checks if the user is viewer the error page for logging in, if so display validation requirements.
+    window.onload = (function () {
+        document.getElementById("errorMessage").hidden = true;
+        const url = document.URL;
+        if (url.includes("error")) {
+            document.getElementById("errorMessage").hidden = false;
+        }
+    });
+</script>
+
+<script>
+    function validateForm() {
+        const form = document.getElementById("loginForm");
+        const input = document.getElementById("username");
+        const errorMsg = document.getElementById("error-msg");
+        let emailRegex = new RegExp("^[a-zA-Z0-9_+&*-]+(?:.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+[.])+[a-zA-Z]{2,7}$");
+
+        const email = input.value.trim();
+
+        if (email === "" || !emailRegex.test(email)) {
+            errorMsg.textContent = "Email address is invalid";
+            return;
+        }
+
+        form.submit();
+    }
+</script>
+
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>

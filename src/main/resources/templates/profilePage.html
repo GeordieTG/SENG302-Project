@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}">
+    <link rel="stylesheet" th:href="@{/css/calendar.css}">
+    <script th:src="@{/JavaScript/UserProfile.js}"></script>
+    <script th:src="@{/JavaScript/imageHandler.js}"></script>
+    <script th:src="@{/JavaScript/UserTabChange.js}"></script>
+    <script defer th:src="@{/JavaScript/calendar.js}"></script>
+    <script th:src="@{/JavaScript/clubCreation.js}"></script>
+    <script th:src="@{/JavaScript/recordMeal.js}"></script>
+    <script th:src="@{/JavaScript/caloriePreference.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <title>User Profile</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <style>
+        .toast-danger {
+            color: #D9534F; /* Indian red */
+        }
+    </style>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        let csrfToken = /*[[${_csrf.token}]]*/ '';
+        createGlobal(csrfToken)
+        let events = [[${events}]];
+        let teamEvents = [[${teamEvents}]];
+        let recentFoods = [[${recentFoods}]];
+        /*]]>*/
+    </script>
+</head>
+
+
+<body class="bg-body-secondary"
+      onload="renderCalendar(events, teamEvents, []),createFoodNutritionChart(),alertOnErrorConnectToGarminWatch(),loadRecent(recentFoods)"
+      style="background-repeat: no-repeat;">
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+
+<div class="m-3" id="column-1">
+    <div class="row">
+        <div class="col-12">
+            <!-- Profile Card -->
+            <div class="card d-flex justify-content-end border-0" id="teamBanner"
+                 style="background-image: url(images/team_banner.jpg);">
+                <div class="card-body bg-body p-2 d-flex" id="profileInfo" style="border-bottom-left-radius: var(--bs-border-radius); border-bottom-right-radius: var(--bs-border-radius);">
+                    <div class="row m-0 w-100">
+                        <div class="col-3">
+                            <!--Profile picture and Sports Tab-->
+                            <div class="d-flex justify-content-end ">
+                                <div class="h-auto d-flex flex-column justify-content-center align-items-center">
+                                    <img alt="image not found"
+                                         class="img-fluid rounded-circle profile-picture teamLogo"
+                                         id="picture-id"
+                                         th:src="@{${profilePicture}}">
+                                    <div style="margin: -28px" id="profileImageButton">
+                                        <!-- Change PFP Button-->
+                                        <label class="btn btn-default"
+                                               for="profilePicture"
+                                               id="profilePictureLabelPlus"
+                                               style="display: inline-block">
+                                            <svg class="bi bi-plus bg-body-secondary text-body border-0 rounded-circle"
+                                                 fill="currentColor"
+                                                 height="40"
+                                                 style="border: 1px solid #ccc; padding: 4px; border-radius: 50%; width: 40px; height: 40px"
+                                                 viewBox="0 0 16 16"
+                                                 width="40"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                            </svg>
+                                        </label>
+                                        <label class="btn btn-default"
+                                               id="profilePictureLabelTick" style="display: none">
+                                            <svg class="bi bi-check-lg bg-white rounded-circle"
+                                                 fill="currentColor"
+                                                 height="16"
+                                                 style="border: 1px solid #ccc; padding: 4px; border-radius: 50%; width: 40px; height: 40px"
+                                                 th:onclick="uploadImage([[${userID}]], 'user')"
+                                                 viewBox="0 0 16 16"
+                                                 width="16"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
+                                            </svg>
+                                        </label>
+                                        <input accept="image/png, image/jpeg, image/svg, image/gif"
+                                               class="form-control editField"
+                                               hidden
+                                               id="profilePicture"
+                                               onchange="handleUpload(event)" required
+                                               th:name="profilePicture"
+                                               type="file">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Personal details-->
+                        <div class="col-6">
+                            <div class="d-flex gap-2 flex-column w-100 justify-content-lg-evenly">
+                                <h1 class="fw-bold text-body" id="userName"
+                                    th:text="${user.getFirstName()} + ' ' + ${user.getLastName()}"></h1>
+                                <div class="row w-100">
+                                    <div class="col-6">
+                                        <svg class="bi bi-envelope-at-fill text-body" fill="currentColor"
+                                             height="16"
+                                             viewBox="0 0 16 16" width="16"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M2 2A2 2 0 0 0 .05 3.555L8 8.414l7.95-4.859A2 2 0 0 0 14 2H2Zm-2 9.8V4.698l5.803 3.546L0 11.801Zm6.761-2.97-6.57 4.026A2 2 0 0 0 2 14h6.256A4.493 4.493 0 0 1 8 12.5a4.49 4.49 0 0 1 1.606-3.446l-.367-.225L8 9.586l-1.239-.757ZM16 9.671V4.697l-5.803 3.546.338.208A4.482 4.482 0 0 1 12.5 8c1.414 0 2.675.652 3.5 1.671Z"/>
+                                            <path d="M15.834 12.244c0 1.168-.577 2.025-1.587 2.025-.503 0-1.002-.228-1.12-.648h-.043c-.118.416-.543.643-1.015.643-.77 0-1.259-.542-1.259-1.434v-.529c0-.844.481-1.4 1.26-1.4.585 0 .87.333.953.63h.03v-.568h.905v2.19c0 .272.18.42.411.42.315 0 .639-.415.639-1.39v-.118c0-1.277-.95-2.326-2.484-2.326h-.04c-1.582 0-2.64 1.067-2.64 2.724v.157c0 1.867 1.237 2.654 2.57 2.654h.045c.507 0 .935-.07 1.18-.18v.731c-.219.1-.643.175-1.237.175h-.044C10.438 16 9 14.82 9 12.646v-.214C9 10.36 10.421 9 12.485 9h.035c2.12 0 3.314 1.43 3.314 3.034v.21Zm-4.04.21v.227c0 .586.227.8.581.8.31 0 .564-.17.564-.743v-.367c0-.516-.275-.708-.572-.708-.346 0-.573.245-.573.791Z"/>
+                                        </svg>
+                                        <span id="userEmail" class="text-body" th:text="${user.getEmail()}"></span>
+                                    </div>
+                                    <div class="col-6">
+                                        <svg class="bi bi-dribbble text-body" fill="currentColor" height="16"
+                                             viewBox="0 0 16 16" width="16"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M8 0C3.584 0 0 3.584 0 8s3.584 8 8 8c4.408 0 8-3.584 8-8s-3.592-8-8-8zm5.284 3.688a6.802 6.802 0 0 1 1.545 4.251c-.226-.043-2.482-.503-4.755-.217-.052-.112-.096-.234-.148-.355-.139-.33-.295-.668-.451-.99 2.516-1.023 3.662-2.498 3.81-2.69zM8 1.18c1.735 0 3.323.65 4.53 1.718-.122.174-1.155 1.553-3.584 2.464-1.12-2.056-2.36-3.74-2.551-4A6.95 6.95 0 0 1 8 1.18zm-2.907.642A43.123 43.123 0 0 1 7.627 5.77c-3.193.85-6.013.833-6.317.833a6.865 6.865 0 0 1 3.783-4.78zM1.163 8.01V7.8c.295.01 3.61.053 7.02-.971.199.381.381.772.555 1.162l-.27.078c-3.522 1.137-5.396 4.243-5.553 4.504a6.817 6.817 0 0 1-1.752-4.564zM8 14.837a6.785 6.785 0 0 1-4.19-1.44c.12-.252 1.509-2.924 5.361-4.269.018-.009.026-.009.044-.017a28.246 28.246 0 0 1 1.457 5.18A6.722 6.722 0 0 1 8 14.837zm3.81-1.171c-.07-.417-.435-2.412-1.328-4.868 2.143-.338 4.017.217 4.251.295a6.774 6.774 0 0 1-2.924 4.573z"
+                                                  fill-rule="evenodd"/>
+                                        </svg>
+                                        <span class="text-body" th:text="${user.getFavouriteSport()}"></span>
+                                    </div>
+                                </div>
+                                <div class="row w-100">
+                                    <div class="col-6">
+                                        <svg class="bi bi-calendar-date text-body" fill="currentColor"
+                                             height="20"
+                                             viewBox="0 0 16 16" width="20"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6.445 11.688V6.354h-.633A12.6 12.6 0 0 0 4.5 7.16v.695c.375-.257.969-.62 1.258-.777h.012v4.61h.675zm1.188-1.305c.047.64.594 1.406 1.703 1.406 1.258 0 2-1.066 2-2.871 0-1.934-.781-2.668-1.953-2.668-.926 0-1.797.672-1.797 1.809 0 1.16.824 1.77 1.676 1.77.746 0 1.23-.376 1.383-.79h.027c-.004 1.316-.461 2.164-1.305 2.164-.664 0-1.008-.45-1.05-.82h-.684zm2.953-2.317c0 .696-.559 1.18-1.184 1.18-.601 0-1.144-.383-1.144-1.2 0-.823.582-1.21 1.168-1.21.633 0 1.16.398 1.16 1.23z"/>
+                                            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
+                                        </svg>
+                                        <span id="userDOB" class="text-body"
+                                              th:text="${user.getDateOfBirth()}"></span>
+                                    </div>
+                                    <div class="col-6">
+                                        <svg class="bi bi-geo-alt-fill text-body" fill="currentColor"
+                                             height="16" viewBox="0 0 16 16"
+                                             width="16" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                                        </svg>
+                                        <span class="text-body" th:text="${user.getLocation().getCity()} + ',   ' + ${user.getLocation().getCountry()}"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!--Garmin Connect Button-->
+                        <div class="col-3 d-flex flex-column justify-content-between">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a class="btn btn-outline-secondary text-body border-0 d-flex gap-2 justify-content-center align-items-center"
+                                       id="garminBtn"
+                                       target="_blank"
+                                       th:href="@{'connectGarmin'}"
+                                       th:switch="${connected}">
+                                        <svg class="bi bi-smartwatch text-body" fill="currentColor" height="16"
+                                             viewBox="0 0 16 16" width="16"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M9 5a.5.5 0 0 0-1 0v3H6a.5.5 0 0 0 0 1h2.5a.5.5 0 0 0 .5-.5V5z"/>
+                                            <path d="M4 1.667v.383A2.5 2.5 0 0 0 2 4.5v7a2.5 2.5 0 0 0 2 2.45v.383C4 15.253 4.746 16 5.667 16h4.666c.92 0 1.667-.746 1.667-1.667v-.383a2.5 2.5 0 0 0 2-2.45V8h.5a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5H14v-.5a2.5 2.5 0 0 0-2-2.45v-.383C12 .747 11.254 0 10.333 0H5.667C4.747 0 4 .746 4 1.667zM4.5 3h7A1.5 1.5 0 0 1 13 4.5v7a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 11.5v-7A1.5 1.5 0 0 1 4.5 3z"/>
+                                        </svg>
+                                        <p class="m-0 text-body" th:case="'True'">Connected</p>
+                                        <p class="m-0 text-body" th:case="'False'">Connect your Garmin</p>
+                                    </a>
+                                    <div class="hidden" th:id="connectState"
+                                         th:value="${connectState.toString()}"></div>
+                                </div>
+                                <div>
+                                    <a class="btn btn-outline-secondary border-0 p-2 m-2 "
+                                       id="editProfileBtn"
+                                       th:href="@{'editProfile?tab=Profile'}">
+                                        <svg class="bi bi-pencil-square text-body" fill="currentColor" height="16"
+                                             viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                            <path d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+                                                  fill-rule="evenodd"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <div id="calorieIntakePreferenceInput" class="d-flex w-100 justify-content-evenly gap-2">
+                                <label for="caloriePreference" class="text-body d-flex justify-content-center align-items-center">
+                                    <svg fill="#000000" height="32px" width="32px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                         viewBox="0 0 490.012 490.012" xml:space="preserve">
+
+                                            <path d="M449.931,233.137c-53.3,53.3-258.6,179.7-315.8,122.5c-55.2-55.2,69.3-262.5,122.6-315.7s140-53.3,193.3,0
+                                                S503.231,179.938,449.931,233.137z"/>
+                                            <path d="M80.531,442.038l59.1-59.1c-7.4-3.1-14-7.8-19.4-13.2c-5.4-5.4-9.7-12.1-13.2-19.4l-59.1,59.1c-0.8-0.8-1.6-1.9-2.3-2.7
+                                                c-10.5-10.5-27.2-10.5-37.7,0s-10.5,27.2,0,37.7c9.7,9.7,25.3,10.5,35.8,1.9c-8.6,10.5-7.8,26.1,1.9,35.8
+                                                c10.5,10.5,27.2,10.5,37.7,0s10.5-27.2,0-37.7C82.431,443.538,81.331,442.737,80.531,442.038z"/>
+
+                                        </svg>
+                                </label>
+                                <select name="caloriePreference" id="caloriePreference" class="form-select"
+
+                                        onchange="updateCaloriePreference()">
+                                    <option th:selected="${caloriePreference == 'cut'}"
+                                            th:value="cut">Cut
+                                    </option>
+                                    <option th:selected="${caloriePreference == 'bulk'}"
+                                            th:value="bulk">
+                                        Bulk
+                                    </option>
+                                    <option th:selected="${caloriePreference == 'maintain'}"
+                                            th:value="maintain">
+                                        Maintain
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!--Nutritional Overview-->
+<div class="row mt-3 gap-3 gap-xl-0 m-2">
+    <div class="col-12 col-xl-5">
+        <div class="card p-4"
+             style="height: 450px; display: flex; flex-direction: column; justify-content: space-between;">
+
+            <h4 class="fw-bold">Daily Nutritional Overview</h4>
+
+            <!--See More-->
+            <div class="position-absolute end-0 mt-1 px-4">
+                <a class="d-inline-flex align-items-center gap-2" th:href="@{'/nutrition?userId=' + ${user.getId()}}">
+                    <svg class="bi bi-arrow-right ml-1" fill="currentColor"
+                         height="12" viewBox="0 0 16 16"
+                         width="12" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"
+                              fill-rule="evenodd"/>
+                    </svg>
+                </a>
+            </div>
+
+            <div style="flex: 1;">
+                <canvas id="nutritionOverviewDoughnutChart"></canvas>
+            </div>
+
+            <div class="text-center pb-3 d-flex justify-content-evenly">
+                <div>
+                    <h5 id="totalFat">[[${totalFat}]] g</h5>
+                    <h6>Fat</h6>
+                </div>
+                <div>
+                    <h5 id="totalCarbs">[[${totalCarbs}]] g</h5>
+                    <h6>Carbs</h6>
+                </div>
+                <div>
+                    <h5 id="totalProtein">[[${totalProtein}]] g</h5>
+                    <h6>Protein</h6>
+                </div>
+            </div>
+
+            <div class="overlay" th:if="${totalFat == 0 and totalProtein == 0 and totalCarbs == 0 and totalCalories == 0}">
+                <div class="text-center">
+                    <h5 class="fw-bold text-body">No Nutrition Logged Today</h5>
+                    <a th:href="@{'/nutrition?userId=' + ${user.getId()}}" style="color: #0000EE; text-decoration: underline">Add an entry to view your
+                        breakdown</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="goalsModal" tabindex="-1" role="dialog"
+         aria-labelledby="goalsModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"
+                        th:text="${userGoalsForm.getId() == null ? 'Set daily goals' : 'Edit Daily goals'}">
+                        </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="post" id="goalsForm" th:action="@{setGoals}"
+                      th:object="${userGoalsForm}">
+                    <input th:field="*{id}" hidden>
+                <div class="modal-body d-flex flex-column justify-content-evenly gap-3">
+
+                    <div>
+                        <label class="required" for="steps">
+                            Steps
+                        </label>
+                        <input aria-describedby="clubNameHelp" autofocus
+                               class="form-control"
+                               id="steps"
+                               type="text"
+                               th:field="*{steps}">
+                        <small class="text-danger form-text" style="display: none" id="stepsError">
+                            Must be a whole number between 1 - 150,000
+                        </small>
+                    </div>
+
+                    <div>
+                        <label class="required" for="caloriesBurnt">
+                            Calories Burnt
+                        </label>
+                        <input aria-describedby="clubNameHelp" autofocus
+                               class="form-control"
+                               id="caloriesBurnt"
+                               type="text"
+                               step="0.1"
+                               th:field="*{caloriesBurnt}"
+                               >
+                        <small class="text-danger form-text" style="display: none" id="caloriesBurntError">
+                            Must be a positive number between 1 - 50,000
+                        </small>
+                    </div>
+
+                    <div>
+                        <label class="required" for="distanceTravelled">
+                            Distance Travelled (km)
+                        </label>
+                        <input aria-describedby="clubNameHelp" autofocus
+                               class="form-control"
+                               id="distanceTravelled"
+                               type="text"
+                               step="0.1"
+                               th:field="*{distanceTravelled}">
+                        <small class="text-danger form-text" style="display: none" id="distanceTravelledError">
+                            Must be a positive number between 0.001 - 500km
+                        </small>
+                    </div>
+
+                    <div>
+                        <label class="required" for="totalActivityTime">
+                            Total Activity Time (minutes)
+                        </label>
+                        <input aria-describedby="clubNameHelp" autofocus
+                               class="form-control"
+                               id="totalActivityTime"
+                               type="text"
+                               step="0.1"
+                               th:field="*{totalActivityTime}">
+                        <small class="text-danger form-text" style="display: none" id="totalActivityTimeError">
+                            Must be a positive number between 1 - 1440min
+                        </small>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="button" onclick="validateGoals()"
+                            class="btn btn-primary"
+                            th:text="${userGoalsForm.getId() == null ? 'Set Goals' : 'Edit Goals'}">
+                    </button>
+
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!--Health Analytics-->
+    <div class="col-12 col-xl-7">
+        <div class="card p-4" style="min-height: 450px">
+            <div class="position-relative">
+                <h4 class="mb-3 fw-bold">Today's Health Analytics</h4>
+                <button type="button" class="btn position-absolute top-0 end-0"
+                        style="background-color: antiquewhite"
+                        data-bs-toggle="modal" data-bs-target="#goalsModal"
+                        th:text="${userGoalsForm.getId() == null ? 'Set Goals' : 'Edit Goals'}">
+                </button>
+
+            </div>
+            <div class="d-flex flex-column justify-content-evenly align-items-center">
+                <div class="row g-2 w-100">
+                    <!--Steps-->
+                    <div class="col-md-6 mt-2">
+                        <div class="d-flex card h-100">
+                            <div class="row h-100">
+                                <div class="col-md-4 col-5 justify-content-end align-items-center d-flex">
+                                    <svg height="1em"
+                                         style="fill: #6457A6; font-size: 40px"
+                                         viewBox="0 0 640 512"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                        <path d="M416 0C352.3 0 256 32 256 32V160c48 0 76 16 104 32s56 32 104 32c56.4 0 176-16 176-96S512 0 416 0zM128 96c0 35.3 28.7 64 64 64h32V32H192c-35.3 0-64 28.7-64 64zM288 512c96 0 224-48 224-128s-119.6-96-176-96c-48 0-76 16-104 32s-56 32-104 32V480s96.3 32 160 32zM0 416c0 35.3 28.7 64 64 64H96V352H64c-35.3 0-64 28.7-64 64z"/>
+                                    </svg>
+                                    ️
+                                </div>
+                                <div class="col-6 justify-content-center align-items-center d-flex">
+                                    <div class="card-body">
+
+                                        <p class="fw-bold"
+                                           th:if="${userGoalsForm.getSteps() == null}"
+                                           style="margin-bottom: 0; font-size: 30px"
+                                           th:text="${garminDaily.getSteps}"></p>
+
+                                        <p class="fw-bold"
+                                           th:unless="${userGoalsForm.getSteps() == null}"
+                                           style="margin-bottom: 0; font-size: 30px"
+                                           th:text="${garminDaily.getSteps} + '/' + ${userGoalsForm.getSteps()}"></p>
+
+                                        <p style="margin-bottom: 0; color: grey">steps</p>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Heart Rate-->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="row h-100">
+                                <div class="col-5 justify-content-end align-items-center d-flex">
+                                    <svg height="1em"
+                                         style="fill: #f13030; font-size: 50px"
+                                         viewBox="0 0 512 512"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                        <path d="M228.3 469.1L47.6 300.4c-4.2-3.9-8.2-8.1-11.9-12.4h87c22.6 0 43-13.6 51.7-34.5l10.5-25.2 49.3 109.5c3.8 8.5 12.1 14 21.4 14.1s17.8-5 22-13.3L320 253.7l1.7 3.4c9.5 19 28.9 31 50.1 31H476.3c-3.7 4.3-7.7 8.5-11.9 12.4L283.7 469.1c-7.5 7-17.4 10.9-27.7 10.9s-20.2-3.9-27.7-10.9zM503.7 240h-132c-3 0-5.8-1.7-7.2-4.4l-23.2-46.3c-4.1-8.1-12.4-13.3-21.5-13.3s-17.4 5.1-21.5 13.3l-41.4 82.8L205.9 158.2c-3.9-8.7-12.7-14.3-22.2-14.1s-18.1 5.9-21.8 14.8l-31.8 76.3c-1.2 3-4.2 4.9-7.4 4.9H16c-2.6 0-5 .4-7.3 1.1C3 225.2 0 208.2 0 190.9v-5.8c0-69.9 50.5-129.5 119.4-141C165 36.5 211.4 51.4 244 84l12 12 12-12c32.6-32.6 79-47.5 124.6-39.9C461.5 55.6 512 115.2 512 185.1v5.8c0 16.9-2.8 33.5-8.3 49.1z"/>
+                                    </svg>
+                                </div>
+                                <div class="col-6 justify-content-center align-items-center d-flex">
+                                    <div class="card-body">
+                                        <p class="fw-bold"
+                                           style="margin-bottom: 0; font-size: 30px"
+                                           th:text="${garminDaily.getHeartRateData().getAverageHeartRate()}"></p>
+                                        <p style="margin-bottom: 0; color: grey">Average Heart
+                                            Rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!--Calories Burnt-->
+                    <div class="col-md-6">
+                        <div class="d-flex card h-100">
+                            <div class="row h-100">
+                                <div
+                                        class="col-5 col-md-4 justify-content-end align-items-center d-flex">
+                                    <svg height="1em"
+                                         style="fill: #FF8966; font-size: 40px"
+                                         viewBox="0 0 448 512"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                        <path d="M159.3 5.4c7.8-7.3 19.9-7.2 27.7 .1c27.6 25.9 53.5 53.8 77.7 84c11-14.4 23.5-30.1 37-42.9c7.9-7.4 20.1-7.4 28 .1c34.6 33 63.9 76.6 84.5 118c20.3 40.8 33.8 82.5 33.8 111.9C448 404.2 348.2 512 224 512C98.4 512 0 404.1 0 276.5c0-38.4 17.8-85.3 45.4-131.7C73.3 97.7 112.7 48.6 159.3 5.4zM225.7 416c25.3 0 47.7-7 68.8-21c42.1-29.4 53.4-88.2 28.1-134.4c-4.5-9-16-9.6-22.5-2l-25.2 29.3c-6.6 7.6-18.5 7.4-24.7-.5c-16.5-21-46-58.5-62.8-79.8c-6.3-8-18.3-8.1-24.7-.1c-33.8 42.5-50.8 69.3-50.8 99.4C112 375.4 162.6 416 225.7 416z"/>
+                                    </svg>
+                                </div>
+                                <div class="col-6 justify-content-center align-items-center d-flex">
+                                    <div class="card-body">
+
+                                        <p class="fw-bold"
+                                           th:if="${userGoalsForm.getCaloriesBurnt() == null}"
+                                           style="margin-bottom: 0; font-size: 30px"
+                                           th:text="${garminDaily.getActiveKilocalories()}"></p>
+
+                                        <p class="fw-bold"
+                                           style="margin-bottom: 0; font-size: 30px"
+                                           th:unless="${userGoalsForm.getCaloriesBurnt() == null}"
+                                           th:text="${garminDaily.getActiveKilocalories()} + '/' + ${userGoalsForm.getCaloriesBurnt()}"></p>
+
+                                        <p style="margin-bottom: 0; color: grey">calories burnt</p>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Distance Travelled-->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="row h-100">
+                                <div class="col-5 justify-content-end align-items-center d-flex">
+                                    <svg height="1em"
+                                         style="fill: #B6D094; font-size: 40px"
+                                         viewBox="0 0 448 512"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+                                        <path d="M210.6 5.9L62 169.4c-3.9 4.2-6 9.8-6 15.5C56 197.7 66.3 208 79.1 208H104L30.6 281.4c-4.2 4.2-6.6 10-6.6 16C24 309.9 34.1 320 46.6 320H80L5.4 409.5C1.9 413.7 0 419 0 424.5c0 13 10.5 23.5 23.5 23.5H192v32c0 17.7 14.3 32 32 32s32-14.3 32-32V448H424.5c13 0 23.5-10.5 23.5-23.5c0-5.5-1.9-10.8-5.4-15L368 320h33.4c12.5 0 22.6-10.1 22.6-22.6c0-6-2.4-11.8-6.6-16L344 208h24.9c12.7 0 23.1-10.3 23.1-23.1c0-5.7-2.1-11.3-6-15.5L237.4 5.9C234 2.1 229.1 0 224 0s-10 2.1-13.4 5.9z"/>
+                                    </svg>
+                                </div>
+                                <div class="col-6 align-items-center d-flex">
+                                    <div class="card-body">
+
+                                        <p class="fw-bold"
+                                           style="margin-bottom: 0; font-size: 30px"
+                                           th:if="${userGoalsForm.getDistanceTravelled() == null}"
+                                           th:text="${garminDaily.getDistanceInMeters/1000 + 'Km'}"></p>
+                                        <p class="fw-bold"
+                                           style="margin-bottom: 0; font-size: 30px"
+                                           th:unless="${userGoalsForm.getDistanceTravelled() == null}"
+                                           th:text="${garminDaily.getDistanceInMeters/1000} + '/' + ${userGoalsForm.getDistanceTravelled()} + ' Km'"></p>
+                                        <p style="margin-bottom: 0; color: grey">distance
+                                            travelled</p>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--Total Exercise Time-->
+                    <div class="col-md-12">
+                        <div class="card h-100 d-flex justify-content-center align-items-center p-3">
+
+                            <div class="row w-100">
+                                <div class="col-5 justify-content-end align-items-center d-flex">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stopwatch-fill" viewBox="0 0 16 16">
+                                        <path d="M6.5 0a.5.5 0 0 0 0 1H7v1.07A7.001 7.001 0 0 0 8 16a7 7 0 0 0 5.29-11.584.531.531 0 0 0 .013-.012l.354-.354.353.354a.5.5 0 1 0 .707-.707l-1.414-1.415a.5.5 0 1 0-.707.707l.354.354-.354.354a.717.717 0 0 0-.012.012A6.973 6.973 0 0 0 9 2.071V1h.5a.5.5 0 0 0 0-1h-3zm2 5.6V9a.5.5 0 0 1-.5.5H4.5a.5.5 0 0 1 0-1h3V5.6a.5.5 0 1 1 1 0z"/>
+                                    </svg>
+                                </div>
+
+                                <div class="col-6 d-flex flex-column">
+                                    <p class="fw-bold" style="margin-bottom: 0; font-size:30px"
+                                       th:if="${userGoalsForm.getTotalActivityTime() == null}"
+                                       th:text="${garminDaily.getActiveTimeHrs} * 60 + ' min'"></p>
+
+                                    <p class="fw-bold" style="margin-bottom: 0; font-size:30px"
+                                       th:unless="${userGoalsForm.getTotalActivityTime() == null}"
+                                       th:text="${garminDaily.getActiveTimeHrs} * 60 + '/' + ${userGoalsForm.getTotalActivityTime()} + ' min'"></p>
+
+                                    <p style="margin-bottom: 0; color:grey">Total Exercise Time</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div th:unless="${userGoalsForm.isEmpty()}"
+                         class="d-flex justify-content-center align-items-center">
+                        <div class="progress-stacked" style="width: 30%;">
+                                <div class="progress"
+                                     th:if="${userGoalsForm.getStepsProgress()} != null"
+                                     role="progressbar"
+                                     th:style="'width: ' + ${userGoalsForm.getStepsProgress() / userGoalsForm.getGoalCount()} + '%;'"
+                                     th:aria-valuenow="${userGoalsForm.getStepsProgress() / userGoalsForm.getGoalCount()}"
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" style="background-color: #6457A6"></div>
+                                </div>
+                                <div class="progress"
+                                     th:if="${userGoalsForm.getCaloriesProgress()} != null"
+                                     role="progressbar"
+                                     th:style="'width: ' + ${userGoalsForm.getCaloriesProgress() / userGoalsForm.getGoalCount()} + '%;'"
+                                     th:aria-valuenow="${userGoalsForm.getCaloriesProgress() / userGoalsForm.getGoalCount()}"
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar"style="background-color: #FF8966"></div>
+                                </div>
+                                <div class="progress"
+                                     th:if="${userGoalsForm.getDistanceProgress()} != null"
+                                     role="progressbar"
+                                     th:style="'width: ' + ${userGoalsForm.getDistanceProgress() / userGoalsForm.getGoalCount()} + '%;'"
+                                     th:aria-valuenow="${userGoalsForm.getDistanceProgress() / userGoalsForm.getGoalCount()}"
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" style="background-color: #B6D094"></div>
+                                </div>
+                                <div class="progress"
+                                     th:if="${userGoalsForm.getTimeProgress()} != null"
+                                     role="progressbar"
+                                     th:style="'width: ' + ${userGoalsForm.getTimeProgress() / userGoalsForm.getGoalCount()} + '%;'"
+                                     th:aria-valuenow="${userGoalsForm.getTimeProgress() / userGoalsForm.getGoalCount()}"
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar bg-secondary"></div>
+                                </div>
+                        </div>
+                        <div class="ms-2" th:text="${userGoalsForm.getTotalProgress()} +'%'"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Blur Overlay-->
+            <div id="garminOverlay" class="overlay"
+                 th:if="${!connected || !garminDaily.validData || (errorSharingData != '')}">
+                <div class="text-center">
+                    <h5 class="fw-bold text-body">No Health Data</h5>
+                    <p class="text-body-secondary">
+                        <span th:if="${connected && errorSharingData != ''}">
+                            <span th:text="${errorSharingData}"></span>
+                        </span>
+                        <span th:unless="${errorSharingData}">
+                            Connect to Garmin to view your analytics
+                        </span>
+                        <br>
+                        <span th:unless="${errorSharingData}">
+                        <a style="color: #0000EE; font-size: 50%; text-decoration: underline"
+                           href="https://www8.garmin.com/manuals/webhelp/vivofit3/EN-US/GUID-FBCFDE33-8B56-462F-A0F3-AC3E22A96CB0.html">
+                            (If you are connected, please "Sync" your watch)
+                        </a>
+                        </span>
+                    </p>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3 gap-3 gap-xl-0 m-2">
+    <!-- Calendar and Formations Card -->
+    <div class="col-12 col-xl-7" id="calendarFormationSection">
+        <div class="card">
+            <div class="card-body px-5">
+                <div class="text-center"
+                     style="margin-bottom: 20px"
+                     th:if="${totalActivitySize} == 0 and ${personalActivitiesSize} == 0">You have
+                    no
+                    upcoming activities
+                </div>
+            </div>
+            <h1 class="mb-1" id="currentMonth" style="width: 30%; margin-left: 10%;"></h1>
+            <div class="mb-1 d-flex gap-2" style="width: 30%; margin-left: 10%;">
+                <button class="btn btn-secondary" id="today-btn">
+                    Today
+                </button>
+                <button class="btn btn-secondary" id="prev-month-btn">
+                    <svg class="bi bi-arrow-left-short" fill="currentColor" height="16"
+                         viewBox="0 0 16 16"
+                         width="16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5z"
+                              fill-rule="evenodd"/>
+                    </svg>
+                </button>
+                <button class="btn btn-secondary" id="next-month-btn">
+                    <svg class="bi bi-arrow-right-short" fill="currentColor" height="16"
+                         viewBox="0 0 16 16"
+                         width="16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"
+                              fill-rule="evenodd"/>
+                    </svg>
+                </button>
+                <div class="ml-auto p-2">
+                    <button aria-expanded="false" class="btn btn-primary dropdown-toggle "
+                            data-bs-toggle="dropdown" id="sport-filter-dropdown-btn"
+                            type="button">Filter Sports
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <div class="form-check mx-3 py-1">
+                                <input class="form-check-input"
+                                       id="select-all-checkbox"
+                                       onchange="handleSelectAll(this)"
+                                       type="checkbox"/>
+                                <label class="form-check-label" for="select-all-checkbox">Select
+                                    All</label>
+                            </div>
+                        </li>
+                        <div class="dropdown-divider"></div>
+                        <li th:each="sport, iStat : ${sports}">
+                            <div class="form-check mx-3 py-1">
+                                <input onchange="renderCalendar(events, teamEvents,
+                            getSelectedSports())"
+                                       th:class="'form-check-input' + ' sport-index-'+${iStat.index}"
+                                       th:id="${sport}" th:value="${sport}"
+                                       type="checkbox"/>
+                                <label class="form-check-label" th:for="${sport}"
+                                       th:text="${sport}"></label>
+                            </div>
+                        </li>
+                    </ul>
+
+                </div>
+            </div>
+
+            <div id="calendar"
+                 style="margin-left: 10%; margin-right: 10%; margin-bottom: 2%; height: 600px; border: 1px solid grey"></div>
+        </div>
+    </div>
+
+
+    <!--Personal Statistics-->
+    <div class="col-12 col-xl-5" style="height: 760px">
+        <div class="card" style="height: 760px">
+            <div class="p-4 row gap-3 gap-xl-0 justify-content-center overflow-auto h-100">
+                <div class="mb-xl-3 col-6" th:each="teamRole: ${teamRoleData}"
+                     th:if="${teamRole.getTotalGames() != 0}">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div th:onclick="'window.location.href = \'' + @{/viewTeam(id=${teamRole.getTeam().getId()})} + '\''">
+                                <h5 class="fw-bold" th:text="${teamRole.getTeam().getName()}"></h5>
+                                <img alt="image not found"
+                                     class="img-fluid rounded-circle profile-picture"
+                                     id="team-profile-picture-id" style="width: 6rem; height: 6rem"
+                                     th:src="@{${teamRole.getTeam().getImage()}}">
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <h6 th:text="'Points Scored: ' + ${teamRole.getTotalPoints()}"></h6>
+                                <h6 th:text="'Matches Played: ' + ${teamRole.getTotalGames()}+'/'+${teamRole.getTeam().getTotalGamesPlayed()}"></h6>
+                            </div>
+                            <h5 class="fw-bold">Time Played</h5>
+                            <div class="d-flex justify-content-evenly">
+                                <h6 th:text="'Overall: ' + ${teamRole.getTotalTime()}"></h6>
+                                <h6 th:if="${teamRole.getTotalGames() != 0}"
+                                    th:text="'Average: ' + ${(teamRole.getTotalTime()/teamRole.getTotalGames())}"></h6>
+                                <h6 th:if="${teamRole.getTotalGames() == 0}"
+                                    th:text="'Average: 0'"></h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Blur Effect-->
+            <div class="overlay" th:if="${!hasStatistics}">
+                <div class="text-center">
+                    <h5 class="fw-bold text-body">No Personal Statistics</h5>
+                    <p class="text-body-secondary">Play games to view your statistics</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="position-fixed bottom-0 start-0 p-3 " style="z-index: 11">
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+         id="imageTooLarge" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg class="bi bi-exclamation-diamond-fill" fill="#D9534F" height="2rem"
+                     viewBox="0 0 16 16"
+                     width="2rem" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <p class="m-0 h5 toast-danger">Image is too large</p>
+            </div>
+        </div>
+    </div>
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+         id="imageIsWrongType" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg class="bi bi-exclamation-diamond-fill" fill="#D9534F" height="2rem"
+                     viewBox="0 0 16 16"
+                     width="2rem" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <p class="m-0 h5 toast-danger">Image must be either a PNG, JPG or a SVG</p>
+            </div>
+        </div>
+    </div>
+
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast w-auto align-items-center text-dark bg-success bg-opacity-25 border-start border-success border-5 border-0"
+         id="foodAdded" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+                <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                </svg>
+                <p class="m-0 h5 toast-success">Food Added Successfully</p>
+            </div>
+        </div>
+    </div>
+
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+         id="foodAddedFailure" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg class="bi bi-exclamation-diamond-fill" fill="#D9534F" height="2rem"
+                     viewBox="0 0 16 16"
+                     width="2rem" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <p class="m-0 h5 toast-danger">Food not added!</p>
+            </div>
+        </div>
+    </div>
+
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast w-auto align-items-center text-dark bg-success bg-opacity-25 border-start border-success border-5 border-0"
+         id="calorieIntakeUpdateValid" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16">
+                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                </svg>
+                <p class="m-0 h5 toast-success">Calorie Intake Preference Updated Successfully</p>
+            </div>
+        </div>
+    </div>
+
+    <div aria-atomic="true"
+         aria-live="assertive"
+         class="toast w-auto align-items-center text-dark bg-danger bg-opacity-25 border-start border-danger border-5 border-0"
+         id="calorieIntakeUpdateInvalid" role="alert">
+        <div class="d-flex align-items-center justify-content-between p-2">
+            <div class="toast-body d-flex align-items-center gap-1">
+                <svg class="bi bi-exclamation-diamond-fill" fill="#D9534F" height="2rem"
+                     viewBox="0 0 16 16"
+                     width="2rem" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098L9.05.435zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                </svg>
+                <p class="m-0 h5 toast-success">Calorie Intake Preference Failed to Update</p>
+            </div>
+        </div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+
+<!--Nutritional Overview Graph-->
+<script>
+    // Hardcoded until we can fetch the stored data
+    const userProtein = [[${totalProtein}]]
+    const userCarbs = [[${totalCarbs}]]
+    const userFat = [[${totalFat}]]
+    const userCalories = [[${totalCalories}]]
+    const ctx = document.getElementById('nutritionOverviewDoughnutChart').getContext('2d');
+
+    const data = {
+        labels: ['Protein', 'Carbs', 'Fat'],
+        datasets: [{
+            data: [userProtein, userCarbs, userFat],
+            backgroundColor: ['#3E78B2', '#004BA8', '#4A525A'],
+        }]
+    };
+
+    const nutritionOverviewDoughnutLabel = {
+        id: 'nutritionOverviewDoughnutLabel',
+        beforeDatasetsDraw(chart, args, pluginOptions) {
+            const {ctx, data} = chart;
+            ctx.save();
+            const xCoor = chart.getDatasetMeta(0).data[0].x;
+            const yCoor = chart.getDatasetMeta(0).data[0].y;
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillStyle = 'rgba(0,0,0,1';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fontSize = '100';
+            ctx.fillText(userCalories, xCoor, yCoor - 5)
+            ctx.font = '16px sans-serif';
+            ctx.fillText("cal", xCoor, yCoor + 15)
+
+        }
+    }
+
+    const nutritionOverviewDoughnutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: data,
+        options: {
+            borderWidth: 1,
+            radius: "75%",
+            responsive: true,
+            maintainAspectRatio: false,
+            cutoutPercentage: 70, // Adjust this value for the size of the cutout
+            legend: {
+                display: false
+            }
+        },
+        plugins: [nutritionOverviewDoughnutLabel]
+    });
+</script>
+</html>

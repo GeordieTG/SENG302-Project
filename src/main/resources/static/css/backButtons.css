@@ -1,0 +1,18 @@
+.redirectBTN:hover {
+    color: white;
+    background-color: black;
+    text-decoration: none;
+}
+
+.redirectBTN {
+    text-decoration: none;
+    display: block;
+    color: #111;
+    text-align: center;
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 2px solid black;
+    border-radius: 4px;
+    width: 20%;
+    list-style: none;
+}

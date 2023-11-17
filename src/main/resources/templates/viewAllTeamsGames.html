@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta context="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>Edit Activity</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+
+    <script th:src="@{/JavaScript/main.js}"></script>
+    <script th:src="@{/JavaScript/locationAPI.js}"></script>
+    <th:block th:replace="~{fragments/bootstrapVersions.html :: head}"/>
+</head>
+<body class="bg-body-secondary">
+
+<header th:replace="~{fragments/header.html :: header}"></header>
+
+<div class="container mt-5 d-flex flex-column gap-4" style="width:50%">
+    <div class="card">
+        <div class="card-body px-4 py-4">
+            <h1>Game History</h1>
+
+
+            <div class="mt-4 d-flex justify-content-center" style="width:100%">
+
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Score</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="text-center" th:if="${allGames.size()} == 0">
+                        <td th:colspan="2">No Games to Show</td>
+                    </tr>
+                    <div th:each="game: ${allGames}">
+                        <tr th:onclick="|window.location.href='| + @{/viewActivity(id=${game.getId})} + |'|">
+                            <td th:text="${game.type}"></td>
+                            <td th:text="${game.startTime.split('T')[0]}"></td>
+                            <td th:if="${game.homeScore == null}">No Score Recorded</td>
+                            <td th:if="${game.homeScore != null}"
+                                th:text="${game.homeScore} + '-' + ${game.oppositionScore}"></td>
+                        </tr>
+                    </div>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body px-4 py-4">
+            <h1>Other History</h1>
+
+
+            <div class="mt-4 d-flex justify-content-center" style="width:100%">
+
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">Type</th>
+                        <th scope="col">Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="text-center" th:if="${allGames.size()} == 0">
+                        <td th:colspan="2">No Games to Show</td>
+                    </tr>
+                    <div th:each="game: ${allOtherGame}">
+                        <tr th:onclick="|window.location.href='| + @{/viewActivity(id=${game.getId})} + |'|">
+                            <td th:text="${game.type}"></td>
+                            <td th:text="${game.startTime.split('T')[0]}"></td>
+                        </tr>
+                    </div>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+</div>
+<th:block th:replace="~{fragments/bootstrapVersions.html :: body}"/>
+</body>
+</html>
